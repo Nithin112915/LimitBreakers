@@ -1,0 +1,33 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Redirect rules for Next.js App Router
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Environment variables (set these in Netlify dashboard)
+[context.production.environment]
+  NODE_ENV = "production"
+  NEXTAUTH_URL = "https://your-app-name.netlify.app"
+  # MONGODB_URI = "your-mongodb-atlas-connection-string"
+  # NEXTAUTH_SECRET = "your-generated-secret-key"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "production"
+  NEXTAUTH_URL = "https://deploy-preview-$DEPLOY_ID--your-app-name.netlify.app"
+
+[context.branch-deploy.environment]
+  NODE_ENV = "production"
+  NEXTAUTH_URL = "https://$BRANCH--your-app-name.netlify.app"
