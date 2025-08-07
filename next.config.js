@@ -21,6 +21,10 @@ const nextConfig = {
   trailingSlash: false,
   // Output configuration for Netlify
   output: 'standalone',
+  // Disable static optimization for problematic pages
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
 }
 
 module.exports = nextConfig
