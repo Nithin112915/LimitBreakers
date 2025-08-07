@@ -25,6 +25,16 @@ const nextConfig = {
   experimental: {
     missingSuspenseWithCSRBailout: false,
   },
+  // Skip static generation for problematic pages
+  exportPathMap: async function (
+    defaultPathMap,
+    { dev, dir, outDir, distDir, buildId }
+  ) {
+    const pathMap = { ...defaultPathMap }
+    // Remove problematic pages from static generation
+    delete pathMap['/profile']
+    return pathMap
+  },
 }
 
 module.exports = nextConfig
