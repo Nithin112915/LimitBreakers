@@ -11,7 +11,8 @@ import {
   ChartBarIcon,
   CalendarIcon,
   ChatBubbleLeftRightIcon,
-  UsersIcon
+  UsersIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -23,6 +24,7 @@ export function Navigation() {
     { name: 'Dashboard', href: '/dashboard', icon: ChartBarIcon },
     { name: 'Habits', href: '/habits', icon: CalendarIcon },
     { name: 'Social', href: '/social', icon: UsersIcon },
+    { name: 'Discover', href: '/discover', icon: MagnifyingGlassIcon },
     { name: 'Community', href: '/community', icon: UserIcon },
     { name: 'AI Coach', href: '/coach', icon: ChatBubbleLeftRightIcon },
     { name: 'Leaderboard', href: '/leaderboard', icon: TrophyIcon },
@@ -56,6 +58,10 @@ export function Navigation() {
             
             {session ? (
               <div className="flex items-center space-x-4">
+                <Link href="/profile" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">
+                  <UserIcon className="h-4 w-4 mr-2" />
+                  Profile
+                </Link>
                 <div className="flex items-center space-x-2">
                   <TrophyIcon className="h-5 w-5 text-yellow-500" />
                   <span className="text-sm font-semibold text-gray-900">
@@ -121,6 +127,14 @@ export function Navigation() {
               
               {session ? (
                 <div className="px-3 py-2 border-t border-gray-200 mt-2">
+                  <Link
+                    href="/profile"
+                    className="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md mb-2"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <UserIcon className="h-5 w-5 mr-3" />
+                    Profile
+                  </Link>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <TrophyIcon className="h-5 w-5 text-yellow-500" />

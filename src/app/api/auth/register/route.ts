@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import dbConnect from '../../../../lib/mongodb'
 import { User } from '../../../../models/User'
+import { generateUserId } from '../../../../lib/userUtils'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,12 +55,24 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12)
 
+    // Generate unique user ID
+    let userId = generateUserId()
+    let userIdExists = await User.findOne({ userId })
+    
+    // Ensure user ID is unique
+    while (userIdExists) {
+      userId = generateUserId()
+      userIdExists = await User.findOne({ userId })
+    }
+
     // Create new user
     const newUser = new User({
       name,
       username,
+      userId,
       email,
       password: hashedPassword,
+      verified: false,
       honorPoints: 100, // Starting points
       level: 1,
       stats: {

@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     
     let completedToday = 0
     habits.forEach(habit => {
-      const todayLog = habit.logs?.find(log => 
+      const todayLog = habit.logs?.find((log: any) => 
         log.date >= startOfDay && log.date < endOfDay && log.completed
       )
       if (todayLog) completedToday++
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     habits.forEach(habit => {
       if (habit.logs) {
         totalLogs += habit.logs.length
-        completedLogs += habit.logs.filter(log => log.completed).length
+        completedLogs += habit.logs.filter((log: any) => log.completed).length
       }
     })
     const successRate = totalLogs > 0 ? Math.round((completedLogs / totalLogs) * 100) : 0
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       
       let completed = 0
       habits.forEach(habit => {
-        const dayLog = habit.logs?.find(log => 
+        const dayLog = habit.logs?.find((log: any) => 
           log.date >= dayStart && log.date < dayEnd && log.completed
         )
         if (dayLog) completed++
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
       }
       categoryBreakdown[habit.category].count++
       if (habit.logs) {
-        categoryBreakdown[habit.category].completed += habit.logs.filter(log => log.completed).length
+        categoryBreakdown[habit.category].completed += habit.logs.filter((log: any) => log.completed).length
       }
     })
 

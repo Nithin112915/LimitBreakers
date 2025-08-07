@@ -29,18 +29,22 @@ export async function GET(request: NextRequest) {
           { visibility: 'public' }
         ]
       })
-    } else {
-      // Public posts only for non-authenticated users
-      posts = await Post.find({ visibility: 'public' })
-    }
-
-    posts = await posts
       .populate('author', 'username name avatar honorPoints level')
       .populate('likes', 'username name avatar')
       .populate('comments.user', 'username name avatar')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
+    } else {
+      // Public posts only for non-authenticated users
+      posts = await Post.find({ visibility: 'public' })
+      .populate('author', 'username name avatar honorPoints level')
+      .populate('likes', 'username name avatar')
+      .populate('comments.user', 'username name avatar')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+    }
 
     return NextResponse.json({ posts, hasMore: posts.length === limit })
   } catch (error) {

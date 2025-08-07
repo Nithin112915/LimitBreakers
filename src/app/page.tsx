@@ -1,7 +1,7 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { HeroSection } from '../components/Home/HeroSection'
 import { FeaturesSection } from '../components/Home/FeaturesSection'
@@ -13,31 +13,48 @@ import { VideoDemo } from '../components/Demo/VideoDemo'
 export default function HomePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [showLanding, setShowLanding] = useState(false)
 
   useEffect(() => {
     console.log('HomePage useEffect - Status:', status, 'Session:', session)
+    
+    // Set a timeout to show landing page if loading takes too long
+    const timeout = setTimeout(() => {
+      if (status === 'loading') {
+        setShowLanding(true)
+      }
+    }, 2000) // Show landing page after 2 seconds of loading
+
     if (status === 'authenticated' && session) {
       console.log('Redirecting to dashboard...')
-      // Use window.location for a hard redirect
-      window.location.href = '/dashboard'
+      router.push('/dashboard')
     }
-  }, [session, status])
+
+    return () => clearTimeout(timeout)
+  }, [session, status, router])
 
   console.log('HomePage render - Status:', status, 'Session:', !!session)
 
-  if (status === 'loading') {
+  // Show loading only briefly, then show landing page
+  if (status === 'loading' && !showLanding) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading Limit Breakers...</p>
+        </div>
       </div>
     )
   }
 
-  // If user is authenticated, don't show landing page (will redirect)
+  // If user is authenticated, show a quick redirect message
   if (status === 'authenticated') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent mx-auto mb-4"></div>
+          <p className="text-white text-lg">Redirecting to dashboard...</p>
+        </div>
       </div>
     )
   }

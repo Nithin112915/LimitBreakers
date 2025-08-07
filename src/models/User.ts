@@ -5,7 +5,9 @@ export interface IUser extends Document {
   password: string
   name: string
   username: string // Unique username like @username
+  userId: string // Unique 8-digit user ID like Instagram
   avatar?: string
+  verified: boolean // Verification badge
   honorPoints: number
   level: number
   joinedAt: Date
@@ -59,7 +61,9 @@ const UserSchema = new Schema<IUser>({
   password: { type: String, required: true },
   name: { type: String, required: true },
   username: { type: String, required: true, unique: true },
+  userId: { type: String, required: true, unique: true },
   avatar: { type: String },
+  verified: { type: Boolean, default: false },
   honorPoints: { type: Number, default: 0 },
   level: { type: Number, default: 1 },
   joinedAt: { type: Date, default: Date.now },
