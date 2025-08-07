@@ -110,8 +110,16 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error('Error registering user:', error)
+    
+    // More specific error handling for production debugging
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const isProduction = process.env.NODE_ENV === 'production'
+    
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { 
+        message: 'Internal server error',
+        ...(isProduction ? {} : { debug: errorMessage, stack: error instanceof Error ? error.stack : undefined })
+      },
       { status: 500 }
     )
   }
