@@ -4,6 +4,8 @@ import { User } from '../../../../models/User'
 import connectDB from '../../../../lib/mongodb'
 import { authOptions } from '../../../../lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     await connectDB()
