@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import dbConnect from '../../../../lib/mongodb'
 import { User } from '../../../../models/User'
-import { generateUserId } from '../../../../lib/userUtils'
+
+// Generate a unique user ID
+function generateUserId(): string {
+  const randomNum = Math.floor(10000000 + Math.random() * 90000000)
+  return `LB${randomNum.toString().slice(-6)}`
+}
 
 export const dynamic = 'force-dynamic'
 
