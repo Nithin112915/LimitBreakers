@@ -5,6 +5,10 @@ import { useSession } from 'next-auth/react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
+
+// Disable static generation for this page
+export const dynamic = 'force-dynamic'
+
 import {
   UserPlusIcon,
   UserMinusIcon,

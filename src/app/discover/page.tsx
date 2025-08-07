@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
+
+// Disable static generation for this page
+export const dynamic = 'force-dynamic'
+
 import { 
   MagnifyingGlassIcon,
   UserIcon,

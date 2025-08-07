@@ -10,6 +10,9 @@ import { TestimonialsSection } from '../components/Home/TestimonialsSection'
 import { CTASection } from '../components/Home/CTASection'
 import { VideoDemo } from '../components/Demo/VideoDemo'
 
+// Disable static generation for this page
+export const dynamic = 'force-dynamic'
+
 export default function HomePage() {
   const { data: session, status } = useSession()
   const router = useRouter()

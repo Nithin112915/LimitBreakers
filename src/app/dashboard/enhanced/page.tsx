@@ -4,6 +4,9 @@ import { useSession } from 'next-auth/react'
 import { redirect } from 'next/navigation'
 import { EnhancedDashboard } from '../../../components/Dashboard/EnhancedDashboard'
 
+// Disable static generation for this page
+export const dynamic = 'force-dynamic'
+
 export default function DashboardPage() {
   const { data: session, status } = useSession()
 

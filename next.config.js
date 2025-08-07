@@ -2,7 +2,7 @@
 const nextConfig = {
   images: {
     domains: ['localhost', 'limit-breakers.com'],
-    unoptimized: true, // For static export compatibility
+    unoptimized: true,
   },
   env: {
     MONGODB_URI: process.env.MONGODB_URI,
@@ -15,13 +15,15 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Optimize for deployment
   swcMinify: true,
-  // Handle trailing slashes
   trailingSlash: false,
-  // Skip static generation for dynamic pages
   experimental: {
     missingSuspenseWithCSRBailout: false,
+    serverComponentsExternalPackages: ['mongoose'],
+  },
+  // Configure build behavior
+  generateBuildId: async () => {
+    return 'netlify-build'
   },
 }
 
