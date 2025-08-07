@@ -19,21 +19,9 @@ const nextConfig = {
   swcMinify: true,
   // Handle trailing slashes
   trailingSlash: false,
-  // Output configuration for Netlify
-  output: 'standalone',
-  // Disable static optimization for problematic pages
+  // Skip static generation for dynamic pages
   experimental: {
     missingSuspenseWithCSRBailout: false,
-  },
-  // Skip static generation for problematic pages
-  exportPathMap: async function (
-    defaultPathMap,
-    { dev, dir, outDir, distDir, buildId }
-  ) {
-    const pathMap = { ...defaultPathMap }
-    // Remove problematic pages from static generation
-    delete pathMap['/profile']
-    return pathMap
   },
 }
 
