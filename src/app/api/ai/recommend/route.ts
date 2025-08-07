@@ -5,9 +5,9 @@ import dbConnect from '../../../../lib/mongodb'
 import { User } from '../../../../models/User'
 import { Habit } from '../../../../models/Habit'
 
-const openai = new OpenAI({
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-})
+}) : null
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,6 +15,12 @@ export async function POST(request: NextRequest) {
     
     if (!session?.user?.email) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (!openai) {
+      return NextResponse.json({ 
+        message: 'AI recommendations are not available. Please configure OpenAI API key.' 
+      }, { status: 503 })
     }
 
     const { type, context } = await request.json()

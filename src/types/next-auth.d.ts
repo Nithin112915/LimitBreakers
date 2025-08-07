@@ -1,26 +1,35 @@
-import { DefaultSession } from 'next-auth'
+import NextAuth from "next-auth"
 
-declare module 'next-auth' {
+declare module "next-auth" {
   interface Session {
     user: {
       id: string
-      honorPoints: number
-      level: number
+      name?: string | null
+      email?: string | null
+      image?: string | null
+      username?: string
+      honorPoints?: number
+      level?: number
       avatar?: string
-    } & DefaultSession['user']
+    }
   }
 
   interface User {
-    honorPoints: number
-    level: number
+    id: string
+    email: string
+    name: string
+    username?: string
     avatar?: string
+    honorPoints?: number
+    level?: number
   }
 }
 
-declare module 'next-auth/jwt' {
+declare module "next-auth/jwt" {
   interface JWT {
-    honorPoints: number
-    level: number
+    username?: string
+    honorPoints?: number
+    level?: number
     avatar?: string
   }
 }

@@ -76,7 +76,7 @@ export default function DashboardPage() {
     { name: 'Join Challenge', icon: UserGroupIcon, color: 'bg-purple-500 hover:bg-purple-600' }
   ]
 
-  const levelProgress = (currentUser.honorPoints % 1000) / 1000 * 100
+  const levelProgress = ((currentUser.honorPoints || 0) % 1000) / 1000 * 100
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -199,7 +199,7 @@ export default function DashboardPage() {
                 </h1>
                 <p className="text-gray-600 mt-1 flex items-center">
                   <StarIcon className="h-4 w-4 text-yellow-500 mr-1" />
-                  Level {Math.floor(currentUser.honorPoints / 1000) + 1} • Continue your streak
+                  Level {Math.floor((currentUser.honorPoints || 0) / 1000) + 1} • Continue your streak
                 </p>
                 <div className="mt-2 w-48 bg-gray-200 rounded-full h-2">
                   <div 
