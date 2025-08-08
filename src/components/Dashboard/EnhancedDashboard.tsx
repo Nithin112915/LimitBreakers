@@ -218,7 +218,7 @@ export function EnhancedDashboard() {
               title="Get AI Advice"
               description="Ask your AI coach for guidance"
               icon={<StarIcon className="h-5 w-5" />}
-              href="/ai-coach"
+              href="/coach"
               color="purple"
             />
           </div>

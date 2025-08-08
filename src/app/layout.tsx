@@ -1,8 +1,10 @@
 import './globals.css'
+import '../styles/theme.css'
 import { Inter } from 'next/font/google'
 import { Providers } from './providers'
 import Layout from '../components/Layout/Layout'
 import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary'
+import { ThemeProvider } from '../contexts/ThemeContext'
 import { Toaster } from 'react-hot-toast'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -22,9 +24,11 @@ export default function RootLayout({
       <body className={inter.className}>
         <ErrorBoundary>
           <Providers>
-            <Layout>
-              {children}
-            </Layout>
+            <ThemeProvider>
+              <Layout>
+                {children}
+              </Layout>
+            </ThemeProvider>
             <Toaster 
               position="top-right"
               toastOptions={{

@@ -19,7 +19,7 @@ const sampleUsers = [
         title: 'Streak Master',
         description: 'Maintain a 10-day streak',
         unlockedAt: new Date('2024-12-20'),
-        points: 100
+        points: 50
       },
       {
         id: 'early-bird',

@@ -72,7 +72,7 @@ const demoData = {
       description: 'Maintain a 10-day streak',
       icon: '🔥',
       unlockedAt: '2024-12-20',
-      points: 100
+      points: 50
     },
     {
       id: 'early-bird',

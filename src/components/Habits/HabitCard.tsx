@@ -24,7 +24,7 @@ interface Habit {
   title: string
   description: string
   category: string
-  difficulty: string
+  difficulty?: string
   honorPointsReward: number
   frequency: { type: string }
   reminders: Array<{ time: string; isEnabled: boolean }>
@@ -151,7 +151,7 @@ const HabitCard = ({
               }`}>
                 {habit.category}
               </span>
-              <span className={`text-sm font-bold ${difficultyColors[habit.difficulty]}`}>
+              <span className={`text-sm font-bold ${difficultyColors[habit.difficulty || 'easy']}`}>
                 +{habit.honorPointsReward} HP
               </span>
             </div>

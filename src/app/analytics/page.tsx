@@ -119,7 +119,11 @@ export default function AnalyticsPage() {
           const dayName = date.toLocaleDateString('en-US', { weekday: 'short' })
           
           const completions = habitsArray.reduce((sum, habit) => {
-            return sum + (habit.completions?.filter((c: any) => c.date.startsWith(dateStr)).length || 0)
+            const dayCompletions = habit.completions?.filter((c: any) => {
+              const completionDate = c.date || c.createdAt
+              return completionDate && completionDate.startsWith(dateStr)
+            }).length || 0
+            return sum + dayCompletions
           }, 0)
           
           weeklyData.push({
@@ -139,7 +143,7 @@ export default function AnalyticsPage() {
           const data = categoryMap.get(category)
           data.count += 1
           data.totalCompletions += habit.analytics?.totalCompletions || 0
-          data.totalPossible += 30 // Assume 30 days for calculation
+          data.totalPossible += Math.floor((Date.now() - new Date(habit.createdAt || Date.now()).getTime()) / (1000 * 60 * 60 * 24)) + 1
         })
 
         const categoryBreakdown = Array.from(categoryMap.entries()).map(([category, data]) => ({
@@ -149,17 +153,31 @@ export default function AnalyticsPage() {
           color: categoryColors[category] || categoryColors.other
         }))
 
-        // Generate monthly trends (last 6 months)
+        // Generate monthly trends (last 6 months) with real data
         const monthlyTrends = []
         for (let i = 5; i >= 0; i--) {
           const date = new Date()
           date.setMonth(date.getMonth() - i)
+          const monthStart = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0]
+          const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0]
           const monthName = date.toLocaleDateString('en-US', { month: 'short' })
+          
+          // Calculate real completions for this month
+          const monthCompletions = habitsArray.reduce((sum, habit) => {
+            const monthlyCount = habit.completions?.filter((c: any) => {
+              const completionDate = c.date || c.createdAt
+              return completionDate && completionDate >= monthStart && completionDate <= monthEnd
+            }).length || 0
+            return sum + monthlyCount
+          }, 0)
           
           monthlyTrends.push({
             month: monthName,
-            completions: Math.floor(Math.random() * 50) + 20, // Mock data
-            habits: habitsArray.length
+            completions: monthCompletions,
+            habits: habitsArray.filter(h => {
+              const created = new Date(h.createdAt || Date.now()).toISOString().split('T')[0]
+              return created <= monthEnd
+            }).length
           })
         }
 

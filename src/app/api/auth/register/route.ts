@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       email,
       password: hashedPassword,
       verified: false,
-      honorPoints: 100, // Starting points
+      honorPoints: 50, // Starting points
       level: 1,
       stats: {
         postsCount: 0,

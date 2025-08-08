@@ -1,111 +1,175 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
+import { useSession } from 'next-auth/react'
+import {
   PlusIcon,
-  HeartIcon,
-  ChatBubbleLeftIcon,
-  ShareIcon,
   TrophyIcon,
   CameraIcon,
+  ChatBubbleLeftIcon,
+  HeartIcon,
+  ShareIcon,
   UsersIcon
 } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
+import CreatePostModal from '../../components/Community/CreatePostModal'
 
-const posts = [
-  {
-    id: 1,
-    user: {
-      name: 'Sarah Chen',
-      avatar: null,
-      honorPoints: 2840,
-      level: 5
-    },
-    content: 'Just completed my 30-day meditation streak! 🧘‍♀️ The AI coach suggestions really helped me find the perfect morning routine.',
-    type: 'achievement',
-    timestamp: '2 hours ago',
-    attachments: [
-      {
-        type: 'image',
-        url: '/api/placeholder/400/300',
-        caption: 'My meditation space'
-      }
-    ],
-    likes: 24,
-    comments: 8,
-    shares: 3,
-    isLiked: false,
-    honorPointsAwarded: 50,
-    relatedHabit: 'Morning Meditation'
-  },
-  {
-    id: 2,
-    user: {
-      name: 'Marcus Johnson',
-      avatar: null,
-      honorPoints: 1850,
-      level: 3
-    },
-    content: 'Anyone else struggling with consistency in their workout routine? Looking for accountability partners! 💪',
-    type: 'question',
-    timestamp: '4 hours ago',
-    attachments: [],
-    likes: 12,
-    comments: 15,
-    shares: 2,
-    isLiked: true,
-    tags: ['fitness', 'accountability', 'workout']
-  },
-  {
-    id: 3,
-    user: {
-      name: 'Elena Rodriguez',
-      avatar: null,
-      honorPoints: 3200,
-      level: 7
-    },
-    content: 'Reading challenge update: finished "Atomic Habits" today! Such an inspiring book for anyone on a growth journey. Highly recommend! 📚',
-    type: 'progress',
-    timestamp: '6 hours ago',
-    attachments: [
-      {
-        type: 'image',
-        url: '/api/placeholder/400/300',
-        caption: 'Book completion proof'
-      }
-    ],
-    likes: 31,
-    comments: 12,
-    shares: 8,
-    isLiked: true,
-    honorPointsAwarded: 15,
-    relatedHabit: 'Read for 30 minutes'
+interface Post {
+  _id: string
+  author: {
+    _id: string
+    name: string
+    username?: string
+    avatar?: string
+    honorPoints: number
+    level: number
   }
-]
+  content: string
+  type: string
+  tags: string[]
+  likes: string[]
+  comments: Array<{
+    user: {
+      _id: string
+      name: string
+      username?: string
+      avatar?: string
+    }
+    content: string
+    createdAt: string
+  }>
+  images?: string[]
+  metadata?: {
+    habitId?: string
+    achievementType?: string
+  }
+  visibility: string
+  createdAt: string
+  updatedAt: string
+}
 
 export default function CommunityPage() {
+  const { data: session, status } = useSession()
+  const [posts, setPosts] = useState<Post[]>([])
+  const [currentUser, setCurrentUser] = useState<any>(null)
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [showCreatePost, setShowCreatePost] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const filters = [
-    { id: 'all', name: 'All Posts', count: 156 },
-    { id: 'achievements', name: 'Achievements', count: 42 },
-    { id: 'progress', name: 'Progress', count: 78 },
-    { id: 'questions', name: 'Questions', count: 23 },
-    { id: 'motivation', name: 'Motivation', count: 13 }
+    { id: 'all', name: 'All Posts', count: posts.length },
+    { id: 'achievement', name: 'Achievements', count: posts.filter(p => p.type === 'achievement').length },
+    { id: 'habit_progress', name: 'Progress', count: posts.filter(p => p.type === 'habit_progress').length },
+    { id: 'text', name: 'General', count: posts.filter(p => p.type === 'text').length }
   ]
 
-  const handleLike = (postId: number) => {
-    // Handle like functionality
-    console.log('Liked post:', postId)
+  // Fetch current user data
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetchCurrentUser()
+    }
+  }, [session])
+
+  // Fetch posts
+  useEffect(() => {
+    fetchPosts()
+  }, [])
+
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await fetch('/api/user/profile')
+      if (response.ok) {
+        const userData = await response.json()
+        setCurrentUser(userData.user)
+      }
+    } catch (error) {
+      console.error('Error fetching current user:', error)
+    }
+  }
+
+  const fetchPosts = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/posts')
+      if (!response.ok) {
+        throw new Error('Failed to fetch posts')
+      }
+      const data = await response.json()
+      setPosts(data.posts || [])
+    } catch (error) {
+      console.error('Error fetching posts:', error)
+      setError('Failed to load posts')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCreatePost = async (postData: {
+    content: string
+    type: string
+    tags: string[]
+    visibility: string
+  }) => {
+    try {
+      const response = await fetch('/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(postData)
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create post')
+      }
+
+      const data = await response.json()
+      if (data.success) {
+        // Add the new post to the beginning of the posts array
+        setPosts(prev => [data.post, ...prev])
+      }
+    } catch (error) {
+      console.error('Error creating post:', error)
+      setError('Failed to create post')
+    }
+  }
+
+  const handleLike = async (postId: string) => {
+    try {
+      const response = await fetch(`/api/posts/${postId}/like`, {
+        method: 'POST'
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to like post')
+      }
+
+      const data = await response.json()
+      if (data.success) {
+        // Update the post in the state
+        setPosts(prev => prev.map(post => 
+          post._id === postId 
+            ? { 
+                ...post, 
+                likes: data.liked 
+                  ? [...post.likes, currentUser?._id].filter(Boolean)
+                  : post.likes.filter(id => id !== currentUser?._id)
+              }
+            : post
+        ))
+      }
+    } catch (error) {
+      console.error('Error liking post:', error)
+    }
   }
 
   const getPostTypeIcon = (type: string) => {
     switch (type) {
       case 'achievement': return TrophyIcon
-      case 'progress': return CameraIcon
-      case 'question': return ChatBubbleLeftIcon
+      case 'habit_progress': return CameraIcon
+      case 'text': return ChatBubbleLeftIcon
       default: return UsersIcon
     }
   }
@@ -113,10 +177,69 @@ export default function CommunityPage() {
   const getPostTypeColor = (type: string) => {
     switch (type) {
       case 'achievement': return 'text-yellow-600 bg-yellow-100'
-      case 'progress': return 'text-blue-600 bg-blue-100'
-      case 'question': return 'text-purple-600 bg-purple-100'
+      case 'habit_progress': return 'text-blue-600 bg-blue-100'
+      case 'text': return 'text-purple-600 bg-purple-100'
       default: return 'text-gray-600 bg-gray-100'
     }
+  }
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+    if (diffInSeconds < 60) return 'Just now'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`
+    return date.toLocaleDateString()
+  }
+
+  const filteredPosts = selectedFilter === 'all' 
+    ? posts 
+    : posts.filter(post => post.type === selectedFilter)
+
+  if (status === 'loading' || loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+            <div className="space-y-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white rounded-lg p-6">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                  <div className="h-20 bg-gray-200 rounded"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Community</h1>
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
+            <button 
+              onClick={fetchPosts}
+              className="btn-primary"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -136,13 +259,15 @@ export default function CommunityPage() {
                 Connect, share, and get inspired by fellow achievers
               </p>
             </div>
-            <button 
-              onClick={() => setShowCreatePost(true)}
-              className="btn-primary flex items-center"
-            >
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Share Progress
-            </button>
+            {session && (
+              <button 
+                onClick={() => setShowCreatePost(true)}
+                className="btn-primary flex items-center"
+              >
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Share Progress
+              </button>
+            )}
           </div>
         </motion.div>
 
@@ -176,133 +301,153 @@ export default function CommunityPage() {
         </motion.div>
 
         {/* Posts */}
-        <div className="space-y-6">
-          {posts.map((post, index) => {
-            const PostTypeIcon = getPostTypeIcon(post.type)
-            
-            return (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="card"
+        {filteredPosts.length === 0 ? (
+          <div className="text-center py-12">
+            <UsersIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
+            <p className="text-gray-600 mb-4">
+              {session 
+                ? "Be the first to share your progress with the community!"
+                : "Sign in to see posts from the community!"
+              }
+            </p>
+            {session && (
+              <button 
+                onClick={() => setShowCreatePost(true)}
+                className="btn-primary"
               >
-                {/* Post Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                      <span className="text-primary-600 font-semibold">
-                        {post.user.name.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold text-gray-900">{post.user.name}</h3>
-                        <span className="flex items-center text-xs text-gray-500">
-                          <TrophyIcon className="h-3 w-3 mr-1" />
-                          {post.user.honorPoints} HP
+                Create Your First Post
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {filteredPosts.map((post, index) => {
+              const PostTypeIcon = getPostTypeIcon(post.type)
+              const isLiked = currentUser && post.likes.includes(currentUser._id)
+              
+              return (
+                <motion.div
+                  key={post._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="card"
+                >
+                  {/* Post Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                        <span className="text-primary-600 font-semibold">
+                          {post.author.name.split(' ').map(n => n[0]).join('')}
                         </span>
-                        <span className="text-xs text-gray-500">Level {post.user.level}</span>
                       </div>
-                      <p className="text-sm text-gray-500">{post.timestamp}</p>
-                    </div>
-                  </div>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPostTypeColor(post.type)}`}>
-                    <PostTypeIcon className="h-3 w-3 mr-1" />
-                    {post.type}
-                  </span>
-                </div>
-
-                {/* Post Content */}
-                <div className="mb-4">
-                  <p className="text-gray-800 whitespace-pre-wrap">{post.content}</p>
-                  
-                  {post.honorPointsAwarded && (
-                    <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                      <TrophyIcon className="h-4 w-4 mr-1" />
-                      +{post.honorPointsAwarded} Honor Points
-                    </div>
-                  )}
-
-                  {post.relatedHabit && (
-                    <div className="mt-2 text-sm text-gray-600">
-                      Related to: <span className="font-medium">{post.relatedHabit}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Attachments */}
-                {post.attachments.length > 0 && (
-                  <div className="mb-4">
-                    {post.attachments.map((attachment, idx) => (
-                      <div key={idx} className="rounded-lg overflow-hidden">
-                        <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                          <CameraIcon className="h-12 w-12 text-gray-400" />
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <h3 className="font-semibold text-gray-900">{post.author.name}</h3>
+                          <span className="flex items-center text-xs text-gray-500">
+                            <TrophyIcon className="h-3 w-3 mr-1" />
+                            {post.author.honorPoints} HP
+                          </span>
+                          <span className="text-xs text-gray-500">Level {post.author.level}</span>
                         </div>
-                        {attachment.caption && (
-                          <p className="text-sm text-gray-600 mt-2">{attachment.caption}</p>
-                        )}
+                        <p className="text-sm text-gray-500">{formatTimeAgo(post.createdAt)}</p>
                       </div>
-                    ))}
+                    </div>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPostTypeColor(post.type)}`}>
+                      <PostTypeIcon className="h-3 w-3 mr-1" />
+                      {post.type.replace('_', ' ')}
+                    </span>
                   </div>
-                )}
 
-                {/* Tags */}
-                {post.tags && (
-                  <div className="mb-4 flex flex-wrap gap-2">
-                    {post.tags.map((tag) => (
-                      <span 
-                        key={tag}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                  {/* Post Content */}
+                  <div className="mb-4">
+                    <p className="text-gray-800 whitespace-pre-wrap">{post.content}</p>
+                  </div>
+
+                  {/* Images */}
+                  {post.images && post.images.length > 0 && (
+                    <div className="mb-4">
+                      {post.images.map((image, idx) => (
+                        <div key={idx} className="rounded-lg overflow-hidden">
+                          <img 
+                            src={image} 
+                            alt="Post attachment" 
+                            className="w-full h-48 object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Tags */}
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="mb-4 flex flex-wrap gap-2">
+                      {post.tags.map((tag) => (
+                        <span 
+                          key={tag}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Post Actions */}
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                    <div className="flex items-center space-x-6">
+                      <button 
+                        onClick={() => handleLike(post._id)}
+                        disabled={!session}
+                        className="flex items-center space-x-2 text-gray-500 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        #{tag}
-                      </span>
-                    ))}
+                        {isLiked ? (
+                          <HeartSolid className="h-5 w-5 text-red-500" />
+                        ) : (
+                          <HeartIcon className="h-5 w-5" />
+                        )}
+                        <span className="text-sm">{post.likes.length}</span>
+                      </button>
+                      <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors">
+                        <ChatBubbleLeftIcon className="h-5 w-5" />
+                        <span className="text-sm">{post.comments.length}</span>
+                      </button>
+                      <button className="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors">
+                        <ShareIcon className="h-5 w-5" />
+                        <span className="text-sm">Share</span>
+                      </button>
+                    </div>
                   </div>
-                )}
-
-                {/* Post Actions */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                  <div className="flex items-center space-x-6">
-                    <button 
-                      onClick={() => handleLike(post.id)}
-                      className="flex items-center space-x-2 text-gray-500 hover:text-red-500 transition-colors"
-                    >
-                      {post.isLiked ? (
-                        <HeartSolid className="h-5 w-5 text-red-500" />
-                      ) : (
-                        <HeartIcon className="h-5 w-5" />
-                      )}
-                      <span className="text-sm">{post.likes}</span>
-                    </button>
-                    <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors">
-                      <ChatBubbleLeftIcon className="h-5 w-5" />
-                      <span className="text-sm">{post.comments}</span>
-                    </button>
-                    <button className="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors">
-                      <ShareIcon className="h-5 w-5" />
-                      <span className="text-sm">{post.shares}</span>
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )
-          })}
-        </div>
+                </motion.div>
+              )
+            })}
+          </div>
+        )}
 
         {/* Load More */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="mt-8 text-center"
-        >
-          <button className="btn-outline">
-            Load More Posts
-          </button>
-        </motion.div>
+        {filteredPosts.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="mt-8 text-center"
+          >
+            <button className="btn-outline">
+              Load More Posts
+            </button>
+          </motion.div>
+        )}
       </div>
+
+      {/* Create Post Modal */}
+      {session && (
+        <CreatePostModal
+          isOpen={showCreatePost}
+          onClose={() => setShowCreatePost(false)}
+          onSubmit={handleCreatePost}
+        />
+      )}
     </div>
   )
 }

@@ -22,7 +22,7 @@ const FloatingActionButton = () => {
       label: 'Add Habit',
       icon: PlusIcon,
       color: 'bg-indigo-500 hover:bg-indigo-600',
-      action: () => router.push('/habits/create')
+      action: () => router.push('/habits?create=true')
     },
     {
       label: 'Quick Check-in',

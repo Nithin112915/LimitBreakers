@@ -1,57 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '../../../lib/auth'
+import connectDB from '../../../lib/mongodb'
+import { Notification } from '../../../models/Notification'
+import { User } from '../../../models/User'
 
 export const dynamic = 'force-dynamic'
 
-interface Notification {
-  id: string
-  type: 'habit_reminder' | 'achievement' | 'friend_activity' | 'level_up' | 'streak_milestone'
-  title: string
-  message: string
-  read: boolean
-  createdAt: Date
-  metadata?: any
-}
-
 export async function GET(request: NextRequest) {
   try {
-    const notifications: Notification[] = [
-      {
-        id: '1',
-        type: 'achievement',
-        title: 'Streak Master Unlocked!',
-        message: 'Congratulations! You\'ve maintained a 10-day streak.',
-        read: false,
-        createdAt: new Date('2024-12-21T08:00:00'),
-        metadata: { achievement: 'streak-master', points: 100 }
-      },
-      {
-        id: '2',
-        type: 'habit_reminder',
-        title: 'Time for Morning Run',
-        message: 'Don\'t forget your morning run today!',
-        read: false,
-        createdAt: new Date('2024-12-21T06:00:00'),
-        metadata: { habitId: '1' }
-      },
-      {
-        id: '3',
-        type: 'level_up',
-        title: 'Level Up!',
-        message: 'You\'ve reached Level 5! Keep up the great work.',
-        read: true,
-        createdAt: new Date('2024-12-20T14:30:00'),
-        metadata: { newLevel: 5, previousLevel: 4 }
-      }
-    ]
+    await connectDB()
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    const sortedNotifications = notifications.sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )
+    // Find user by email
+    const user = await User.findOne({ email: session.user.email })
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    // Get user's notifications
+    const notifications = await Notification.find({ userId: user._id })
+      .sort({ createdAt: -1 })
+      .limit(50)
 
     const unreadCount = notifications.filter(n => !n.read).length
 
     return NextResponse.json({
-      notifications: sortedNotifications,
+      notifications,
       unreadCount
     })
   } catch (error) {
@@ -65,6 +44,13 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
+    await connectDB()
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { notificationId, markAsRead } = await request.json()
 
     if (!notificationId) {
@@ -74,10 +60,32 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
+    // Find user by email
+    const user = await User.findOne({ email: session.user.email })
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    // Update the notification
+    const notification = await Notification.findOneAndUpdate(
+      { 
+        _id: notificationId,
+        userId: user._id
+      },
+      { 
+        read: markAsRead,
+        readAt: markAsRead ? new Date() : null
+      },
+      { new: true }
+    )
+
+    if (!notification) {
+      return NextResponse.json({ error: 'Notification not found' }, { status: 404 })
+    }
+
     return NextResponse.json({
       message: `Notification ${markAsRead ? 'marked as read' : 'marked as unread'}`,
-      notificationId,
-      read: markAsRead
+      notification
     })
   } catch (error) {
     console.error('Error updating notification:', error)

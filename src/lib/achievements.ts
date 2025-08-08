@@ -47,20 +47,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     reward: { points: 50 },
     rarity: 'rare'
   },
-  {
-    id: 'habit_legend_100',
-    title: 'Habit Legend',
-    description: 'Complete 100 habits',
-    icon: '👑',
-    category: 'habit',
-    criteria: {
-      type: 'habit_completions',
-      target: 100,
-      timeframe: 'all_time'
-    },
-    reward: { points: 200 },
-    rarity: 'epic'
-  },
+
   {
     id: 'daily_champion',
     title: 'Daily Champion',
@@ -116,23 +103,10 @@ export const ACHIEVEMENTS: Achievement[] = [
       target: 30,
       timeframe: 'all_time'
     },
-    reward: { points: 100 },
+    reward: { points: 50 },
     rarity: 'epic'
   },
-  {
-    id: 'streak_100',
-    title: 'Unstoppable Force',
-    description: 'Maintain a 100-day streak',
-    icon: '⚡',
-    category: 'streak',
-    criteria: {
-      type: 'streak_days',
-      target: 100,
-      timeframe: 'all_time'
-    },
-    reward: { points: 500 },
-    rarity: 'legendary'
-  },
+
 
   // Level Achievements
   {
@@ -160,7 +134,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       target: 10,
       timeframe: 'all_time'
     },
-    reward: { points: 100 },
+    reward: { points: 50 },
     rarity: 'rare'
   },
   {
@@ -226,20 +200,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
 
   // Points Achievements
-  {
-    id: 'points_100',
-    title: 'Point Collector',
-    description: 'Earn 100 honor points',
-    icon: '💎',
-    category: 'level',
-    criteria: {
-      type: 'points_earned',
-      target: 100,
-      timeframe: 'all_time'
-    },
-    reward: { points: 25 },
-    rarity: 'common'
-  },
+
   {
     id: 'points_500',
     title: 'Honor Seeker',
@@ -251,7 +212,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       target: 500,
       timeframe: 'all_time'
     },
-    reward: { points: 100 },
+    reward: { points: 50 },
     rarity: 'rare'
   },
   {

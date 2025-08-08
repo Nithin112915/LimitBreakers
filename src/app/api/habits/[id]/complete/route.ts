@@ -36,37 +36,154 @@ export async function POST(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 403 })
     }
 
-    // Update habit analytics
-    habit.analytics.totalCompletions += 1
-    habit.analytics.currentStreak += 1
-    if (habit.analytics.currentStreak > habit.analytics.longestStreak) {
-      habit.analytics.longestStreak = habit.analytics.currentStreak
+    // Check if already completed today
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const tomorrow = new Date(today)
+    tomorrow.setDate(today.getDate() + 1)
+
+    const alreadyCompleted = habit.completions?.some((completion: any) => {
+      const completionDate = new Date(completion.date)
+      return completionDate >= today && completionDate < tomorrow
+    })
+
+    if (alreadyCompleted) {
+      return NextResponse.json({ 
+        message: 'Habit already completed today',
+        alreadyCompleted: true 
+      }, { status: 400 })
     }
-    habit.analytics.lastUpdated = new Date()
-
-    await habit.save()
-
-    // Update user honor points
-    user.honorPoints += habit.honorPointsReward
-    await user.save()
 
     // Create completion record
     const completion = {
-      habitId: habit._id,
-      userId: user._id,
       date: new Date(),
-      proofUrl,
-      proofType,
-      notes,
+      proofSubmitted: proofUrl ? {
+        type: proofType || 'photo',
+        url: proofUrl,
+        content: notes,
+        verificationStatus: 'approved'
+      } : undefined,
       honorPointsAwarded: habit.honorPointsReward,
-      verificationStatus: 'approved' // Auto-approve for now
+      notes: notes || ''
+    }
+
+    // Calculate new streak
+    const sortedCompletions = [...(habit.completions || []), completion]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+    let newStreak = 1
+    const todayDate = new Date()
+    todayDate.setHours(0, 0, 0, 0)
+
+    for (let i = 1; i < sortedCompletions.length; i++) {
+      const prevDate = new Date(sortedCompletions[i].date)
+      prevDate.setHours(0, 0, 0, 0)
+      
+      const expectedDate = new Date(todayDate)
+      expectedDate.setDate(todayDate.getDate() - i)
+      
+      if (prevDate.getTime() === expectedDate.getTime()) {
+        newStreak++
+      } else {
+        break
+      }
+    }
+
+    // Calculate success rate
+    const daysSinceCreation = Math.floor((Date.now() - new Date(habit.createdAt).getTime()) / (1000 * 60 * 60 * 24)) + 1
+    const successRate = Math.round((sortedCompletions.length / daysSinceCreation) * 100)
+
+    // Update habit analytics
+    habit.analytics.totalCompletions = sortedCompletions.length
+    habit.analytics.currentStreak = newStreak
+    habit.analytics.longestStreak = Math.max(habit.analytics.longestStreak || 0, newStreak)
+    habit.analytics.successRate = successRate
+    habit.analytics.lastUpdated = new Date()
+    
+    // Add completion to habit
+    habit.completions = habit.completions || []
+    habit.completions.push(completion)
+
+    await habit.save()
+
+    // Update user honor points and streaks
+    const previousHonorPoints = user.honorPoints
+    const newHonorPoints = previousHonorPoints + habit.honorPointsReward
+    const previousLevel = Math.floor(previousHonorPoints / 1000) + 1
+    const newLevel = Math.floor(newHonorPoints / 1000) + 1
+    const leveledUp = newLevel > previousLevel
+
+    user.honorPoints = newHonorPoints
+    user.level = newLevel
+    user.streaks = user.streaks || { current: 0, longest: 0, lastUpdated: new Date() }
+    user.streaks.current = Math.max(user.streaks.current, newStreak)
+    user.streaks.longest = Math.max(user.streaks.longest, newStreak)
+    user.streaks.lastUpdated = new Date()
+
+    await user.save()
+
+    // Check for achievements
+    const achievements = []
+    
+    // Streak achievements
+    if (newStreak === 7) {
+      achievements.push({
+        id: 'week-warrior',
+        title: 'Week Warrior',
+        description: 'Completed a 7-day streak',
+        honorPoints: 50
+      })
+    } else if (newStreak === 30) {
+      achievements.push({
+        id: 'month-master',
+        title: 'Month Master', 
+        description: 'Completed a 30-day streak',
+        honorPoints: 200
+      })
+    }
+
+    // Level up achievement
+    if (leveledUp) {
+      achievements.push({
+        id: `level-${newLevel}`,
+        title: `Level ${newLevel} Achieved!`,
+        description: `Reached level ${newLevel}`,
+        honorPoints: newLevel * 25
+      })
+    }
+
+    // Total completions achievements
+    const totalCompletions = habit.analytics.totalCompletions
+    if (totalCompletions === 1) {
+      achievements.push({
+        id: 'first-step',
+        title: 'First Step',
+        description: 'Completed your first habit',
+        honorPoints: 20
+      })
+    } else if (totalCompletions === 50) {
+      achievements.push({
+        id: 'halfway-hero',
+        title: 'Halfway Hero',
+        description: 'Completed 50 habit instances',
+        honorPoints: 50
+      })
     }
 
     return NextResponse.json({ 
-      message: 'Habit completed successfully',
+      message: 'Habit completed successfully!',
       completion,
-      honorPointsAwarded: habit.honorPointsReward,
-      newStreak: habit.analytics.currentStreak
+      honorPointsEarned: habit.honorPointsReward,
+      newStreak,
+      totalHonorPoints: newHonorPoints,
+      currentLevel: newLevel,
+      leveledUp,
+      achievements,
+      successRate,
+      habit: {
+        ...habit.toObject(),
+        analytics: habit.analytics
+      }
     }, { status: 201 })
   } catch (error) {
     console.error('Error completing habit:', error)

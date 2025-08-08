@@ -50,14 +50,14 @@ export async function POST(request: NextRequest) {
       title, 
       description, 
       category, 
-      difficulty, 
+      honorPointsReward,
       frequency,
       reminders,
       proofRequirements,
       tags 
     } = await request.json()
 
-    if (!title || !category || !difficulty) {
+    if (!title || !category) {
       return NextResponse.json(
         { message: 'Missing required fields' },
         { status: 400 }
@@ -72,18 +72,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 })
     }
 
-    // Calculate honor points based on difficulty
-    const pointsMap: { [key: string]: number } = { easy: 10, medium: 15, hard: 25 }
-    const honorPointsReward = pointsMap[difficulty.toLowerCase()] || 10
-    const honorPointsPenalty = Math.floor(honorPointsReward * 0.5)
+    // Use provided honor points or default to 15
+    const finalHonorPoints = honorPointsReward || 15
+    const honorPointsPenalty = Math.floor(finalHonorPoints * 0.5)
 
     const habit = await Habit.create({
       userId: user._id,
       title,
       description,
       category,
-      difficulty: difficulty.toLowerCase(),
-      honorPointsReward,
+      honorPointsReward: finalHonorPoints,
       honorPointsPenalty,
       frequency: frequency || { type: 'daily' },
       reminders: reminders || [],

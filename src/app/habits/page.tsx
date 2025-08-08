@@ -4,14 +4,17 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import toast from 'react-hot-toast'
 import Loading from '../../components/UI/Loading'
 import HabitCard from '../../components/Habits/HabitCard'
+import CreateHabitModal from '../../components/Habits/CreateHabitModal'
+import { notificationManager } from '../../lib/notifications'
 import {
   PlusIcon,
   FunnelIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  BellIcon
 } from '@heroicons/react/24/outline'
 
 // Disable static generation for this page
@@ -22,7 +25,7 @@ interface Habit {
   title: string
   description: string
   category: string
-  difficulty: string
+  difficulty?: string
   honorPointsReward: number
   frequency: { type: string }
   reminders: Array<{ time: string; isEnabled: boolean }>
@@ -47,32 +50,58 @@ interface Habit {
 export default function HabitsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [habits, setHabits] = useState<Habit[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [completingHabit, setCompletingHabit] = useState<string | null>(null)
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return // Still loading
     if (session) {
       fetchHabits()
+      initializeNotifications()
     } else {
       setLoading(false) // No session, stop loading
     }
   }, [session, status])
+
+  // Check for create modal parameter
+  useEffect(() => {
+    const createParam = searchParams.get('create')
+    if (createParam === 'true') {
+      setShowCreateModal(true)
+      // Clean up URL without the parameter
+      router.replace('/habits', { scroll: false })
+    }
+  }, [searchParams, router])
+
+  const initializeNotifications = async () => {
+    const granted = await notificationManager.requestPermission()
+    setNotificationsEnabled(granted)
+    
+    if (granted) {
+      // Schedule notifications for all habits once granted
+      const response = await fetch('/api/habits')
+      if (response.ok) {
+        const habitsData = await response.json()
+        const habitsArray = Array.isArray(habitsData) ? habitsData : []
+        notificationManager.scheduleAllHabitReminders(habitsArray)
+      }
+    }
+  }
 
   const fetchHabits = async () => {
     try {
       const response = await fetch('/api/habits')
       if (response.ok) {
         const data = await response.json()
-        console.log('Fetched habits:', data) // Debug log
-        setHabits(Array.isArray(data) ? data : [])
+        setHabits(data)
       } else {
-        console.error('Failed to fetch habits:', response.status, response.statusText)
-        const errorData = await response.json().catch(() => ({}))
-        console.error('Error details:', errorData)
+        const errorData = await response.json()
         toast.error('Failed to load habits')
       }
     } catch (error) {
@@ -113,7 +142,25 @@ export default function HabitsPage() {
               }
             : habit
         ))
+        
         toast.success(`Habit completed! +${result.honorPointsEarned || 0} Honor Points 🎉`)
+        
+        // Show achievement notifications
+        if (result.achievements?.length > 0) {
+          result.achievements.forEach((achievement: any) => {
+            notificationManager.showAchievementNotification(
+              achievement.title,
+              achievement.description,
+              achievement.honorPoints
+            )
+          })
+        }
+
+        // Show streak notification for milestones
+        if (result.newStreak > 1 && result.newStreak % 7 === 0) {
+          const habitTitle = habits.find(h => h._id === habitId)?.title || 'Habit'
+          notificationManager.showStreakNotification(result.newStreak, habitTitle)
+        }
       } else {
         const error = await response.json()
         toast.error(error.message || 'Failed to complete habit')
@@ -237,13 +284,13 @@ export default function HabitsPage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">My Habits</h1>
             <p className="text-gray-600">Track and manage your daily habits</p>
           </div>
-          <Link
-            href="/habits/create"
+          <button
+            onClick={() => setShowCreateModal(true)}
             className="mt-4 sm:mt-0 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2 w-fit"
           >
             <PlusIcon className="h-5 w-5" />
             <span>Add New Habit</span>
-          </Link>
+          </button>
         </div>
 
         {/* Filters and Search */}
@@ -328,19 +375,29 @@ export default function HabitsPage() {
                   }
                 </p>
                 {(!searchTerm && filter === 'all') && (
-                  <Link
-                    href="/habits/create"
+                  <button
+                    onClick={() => setShowCreateModal(true)}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors inline-flex items-center space-x-2"
                   >
                     <PlusIcon className="h-5 w-5" />
                     <span>Create Your First Habit</span>
-                  </Link>
+                  </button>
                 )}
               </div>
             </div>
           </div>
         )}
       </div>
+
+      {/* Create Habit Modal */}
+      <CreateHabitModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onHabitCreated={() => {
+          setShowCreateModal(false)
+          fetchHabits() // Refresh the habits list
+        }}
+      />
     </div>
   )
 }

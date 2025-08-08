@@ -5,7 +5,7 @@ export interface IHabit extends Document {
   title: string
   description?: string
   category: 'health' | 'fitness' | 'learning' | 'productivity' | 'mindfulness' | 'social' | 'other'
-  difficulty: 'easy' | 'medium' | 'hard'
+  difficulty?: 'easy' | 'medium' | 'hard' // Made optional for backward compatibility
   honorPointsReward: number
   honorPointsPenalty: number
   frequency: {
@@ -59,7 +59,7 @@ const HabitSchema = new Schema<IHabit>({
   difficulty: { 
     type: String, 
     enum: ['easy', 'medium', 'hard'],
-    required: true 
+    required: false // Made optional
   },
   honorPointsReward: { type: Number, required: true },
   honorPointsPenalty: { type: Number, required: true },

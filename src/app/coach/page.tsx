@@ -67,10 +67,31 @@ export default function CoachPage() {
 
   const fetchUserStats = async () => {
     try {
-      const response = await fetch('/api/user/stats');
+      // Fetch real user habits data
+      const response = await fetch('/api/habits');
       if (response.ok) {
-        const stats = await response.json();
-        setUserStats(stats);
+        const habits = await response.json();
+        const habitsArray = Array.isArray(habits) ? habits : [];
+        
+        // Calculate real stats from habits
+        const totalHabits = habitsArray.length;
+        const activeHabits = habitsArray.filter(h => h.isActive).length;
+        const currentStreak = Math.max(...habitsArray.map(h => h.analytics?.currentStreak || 0), 0);
+        const honorPoints = habitsArray.reduce((sum, h) => 
+          sum + (h.analytics?.totalCompletions || 0) * h.honorPointsReward, 0
+        );
+        const successRate = habitsArray.length > 0 
+          ? Math.round(habitsArray.reduce((sum, h) => sum + (h.analytics?.successRate || 0), 0) / habitsArray.length)
+          : 0;
+        
+        setUserStats({
+          totalHabits,
+          activeHabits,
+          currentStreak,
+          honorPoints,
+          successRate,
+          level: Math.floor(honorPoints / 1000) + 1
+        });
       }
     } catch (error) {
       console.error('Error fetching user stats:', error);
@@ -443,12 +464,24 @@ export default function CoachPage() {
                     <span className="font-medium">{userStats.totalHabits}</span>
                   </div>
                   <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Active Habits</span>
+                    <span className="font-medium">{userStats.activeHabits}</span>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Current Streak</span>
                     <span className="font-medium">{userStats.currentStreak} days</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Honor Points</span>
                     <span className="font-medium">{userStats.honorPoints}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Success Rate</span>
+                    <span className="font-medium">{userStats.successRate}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Level</span>
+                    <span className="font-medium">Level {userStats.level}</span>
                   </div>
                 </div>
               </div>
