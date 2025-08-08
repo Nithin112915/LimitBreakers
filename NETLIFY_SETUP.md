@@ -30,3 +30,20 @@ After adding all environment variables, trigger a new deployment by:
 2. Click "Trigger deploy" > "Deploy site"
 
 This will fix the internal server error that friends are experiencing during signup.
+
+## Monitoring Your Application
+
+### Netlify Usage Monitoring
+- **Dashboard**: https://app.netlify.com/projects/limibreakers
+- **Analytics**: Monitor bandwidth, builds, and function invocations
+- **Free Tier**: 100GB bandwidth/month, 300 build minutes/month
+
+### MongoDB Atlas Monitoring  
+- **Dashboard**: https://cloud.mongodb.com/
+- **Metrics**: Database storage, connections, operations
+- **Free Tier**: 512MB storage, shared cluster
+
+### Cost Implications
+- **Completely Free** within the limits above
+- **No charges** for keeping the application running 24/7
+- **Only pay** if you exceed free tier limits (very unlikely for personal projects)

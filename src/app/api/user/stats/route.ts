@@ -35,23 +35,29 @@ export async function GET(request: NextRequest) {
     const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000)
     
     let completedToday = 0
+    let totalCompletions = 0
+    
     habits.forEach(habit => {
-      const todayLog = habit.logs?.find((log: any) => 
-        log.date >= startOfDay && log.date < endOfDay && log.completed
-      )
-      if (todayLog) completedToday++
+      // Check if completed today using completions array
+      const todayCompletion = habit.completions?.find((completion: any) => {
+        const completionDate = new Date(completion.date)
+        return completionDate >= startOfDay && completionDate < endOfDay
+      })
+      if (todayCompletion) completedToday++
+      
+      // Sum up total completions
+      totalCompletions += habit.analytics?.totalCompletions || 0
     })
 
-    // Calculate success rate
-    let totalLogs = 0
-    let completedLogs = 0
-    habits.forEach(habit => {
-      if (habit.logs) {
-        totalLogs += habit.logs.length
-        completedLogs += habit.logs.filter((log: any) => log.completed).length
-      }
-    })
-    const successRate = totalLogs > 0 ? Math.round((completedLogs / totalLogs) * 100) : 0
+    // Calculate success rate based on days since creation
+    const totalPossibleCompletions = habits.reduce((sum, habit) => {
+      const daysSinceCreation = Math.floor((Date.now() - new Date(habit.createdAt).getTime()) / (1000 * 60 * 60 * 24)) + 1
+      return sum + daysSinceCreation
+    }, 0)
+    
+    const averageSuccessRate = totalPossibleCompletions > 0 
+      ? Math.round((totalCompletions / totalPossibleCompletions) * 100) 
+      : 0
 
     // Get weekly progress
     const weeklyProgress: Array<{ day: string; completed: number; total: number }> = []
@@ -63,10 +69,11 @@ export async function GET(request: NextRequest) {
       
       let completed = 0
       habits.forEach(habit => {
-        const dayLog = habit.logs?.find((log: any) => 
-          log.date >= dayStart && log.date < dayEnd && log.completed
-        )
-        if (dayLog) completed++
+        const dayCompletion = habit.completions?.find((completion: any) => {
+          const completionDate = new Date(completion.date)
+          return completionDate >= dayStart && completionDate < dayEnd
+        })
+        if (dayCompletion) completed++
       })
       
       weeklyProgress.push({
@@ -83,9 +90,7 @@ export async function GET(request: NextRequest) {
         categoryBreakdown[habit.category] = { count: 0, completed: 0 }
       }
       categoryBreakdown[habit.category].count++
-      if (habit.logs) {
-        categoryBreakdown[habit.category].completed += habit.logs.filter((log: any) => log.completed).length
-      }
+      categoryBreakdown[habit.category].completed += habit.analytics?.totalCompletions || 0
     })
 
     const categoryArray = Object.entries(categoryBreakdown).map(([category, data]) => ({
@@ -100,12 +105,14 @@ export async function GET(request: NextRequest) {
       completedToday,
       honorPoints: user.honorPoints || 0,
       level: user.level || 1,
-      currentStreak: user.streaks?.current || 0,
-      longestStreak: user.streaks?.longest || 0,
-      successRate,
+      currentStreak: Math.max(...habits.map(h => h.analytics?.currentStreak || 0), 0),
+      longestStreak: Math.max(...habits.map(h => h.analytics?.longestStreak || 0), 0),
+      totalCompletions,
+      averageSuccessRate,
       weeklyProgress,
       categoryBreakdown: categoryArray,
-      recentAchievements: user.achievements || [],
+      recentAchievements: user.achievements?.slice(-5) || [], // Last 5 achievements
+      allAchievements: user.achievements || [],
       pointsHistory: [] // You can implement this based on your needs
     }
 

@@ -1,281 +1,272 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-
-// Disable static generation for this page
-export const dynamic = 'force-dynamic'
-
+import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 import { 
-  TrophyIcon, 
-  PlusIcon,
-  ChartBarIcon,
-  CalendarIcon,
+  TrophyIcon,
   FireIcon,
-  UserGroupIcon,
-  BellIcon,
-  Cog6ToothIcon,
-  SparklesIcon,
-  ChevronDownIcon,
-  ArrowTrendingUpIcon,
-  StarIcon
+  CheckCircleIcon,
+  ChartBarIcon,
+  PlusIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline'
-import { QuickStats } from '../../components/Dashboard/QuickStats'
-import { HabitOverview } from '../../components/Dashboard/HabitOverview'
-import { StreakCalendar } from '../../components/Dashboard/StreakCalendar'
-import { AIRecommendations } from '../../components/Dashboard/AIRecommendations'
-import { RecentActivity } from '../../components/Dashboard/RecentActivity'
-import { UpcomingHabits } from '../../components/Dashboard/UpcomingHabits'
+
+interface DashboardStats {
+  totalHonorPoints: number
+  totalHabits: number
+  activeHabits: number
+  completedToday: number
+  currentStreak: number
+  longestStreak: number
+}
+
+interface Habit {
+  _id: string
+  title: string
+  description: string
+  category: string
+  difficulty: string
+  honorPointsReward: number
+  isActive: boolean
+  analytics: {
+    totalCompletions: number
+    currentStreak: number
+    longestStreak: number
+    successRate: number
+  }
+  completions: Array<{
+    date: string
+    proofUrl?: string
+    proofType?: string
+    notes?: string
+  }>
+}
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
-  const [activeTab, setActiveTab] = useState('overview')
-  const router = useRouter()
+  const [stats, setStats] = useState<DashboardStats>({
+    totalHonorPoints: 0,
+    totalHabits: 0,
+    activeHabits: 0,
+    completedToday: 0,
+    currentStreak: 0,
+    longestStreak: 0
+  })
+  const [habits, setHabits] = useState<Habit[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Redirect to signin if not authenticated (after loading is complete)
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin')
+    if (status === 'loading') return
+    if (session) {
+      fetchDashboardData()
+    } else {
+      setLoading(false)
     }
-  }, [status, router])
+  }, [session, status])
 
-  if (status === 'loading') {
+  const fetchDashboardData = async () => {
+    try {
+      const habitsResponse = await fetch('/api/habits')
+      if (habitsResponse.ok) {
+        const habitsData = await habitsResponse.json()
+        const habitsArray = Array.isArray(habitsData) ? habitsData : []
+        setHabits(habitsArray)
+        
+        // Calculate stats from habits data
+        const today = new Date().toISOString().split('T')[0]
+        const completedToday = habitsArray.filter(h => 
+          h.completions?.some((c: any) => c.date.startsWith(today))
+        ).length
+        
+        const activeHabits = habitsArray.filter(h => h.isActive).length
+        const totalHonorPoints = habitsArray.reduce((sum, h) => 
+          sum + (h.analytics?.totalCompletions || 0) * h.honorPointsReward, 0
+        )
+
+        setStats({
+          totalHonorPoints,
+          totalHabits: habitsArray.length,
+          activeHabits,
+          completedToday,
+          currentStreak: Math.max(...habitsArray.map(h => h.analytics?.currentStreak || 0), 0),
+          longestStreak: Math.max(...habitsArray.map(h => h.analytics?.longestStreak || 0), 0)
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-600"></div>
-          <p className="text-gray-600 animate-pulse">Loading your dashboard...</p>
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your dashboard...</p>
         </div>
       </div>
     )
   }
 
-  // If not authenticated, show loading while redirecting
-  if (status === 'unauthenticated') {
+  if (!session) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-600"></div>
-          <p className="text-gray-600 animate-pulse">Redirecting to sign in...</p>
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Welcome to LimitBreakers</h1>
+          <p className="text-gray-600 mb-8">Please sign in to access your dashboard</p>
+          <Link
+            href="/auth/signin"
+            className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Sign In
+          </Link>
         </div>
       </div>
     )
-  }
-
-  // Use session data for authenticated users
-  const currentUser = session?.user || {
-    name: 'Demo User',
-    email: 'demo@example.com',
-    honorPoints: 2450,
-    level: 5,
-    avatar: '/api/placeholder/40/40'
-  }
-
-  const quickActions = [
-    { name: 'Add Habit', icon: PlusIcon, color: 'bg-indigo-500 hover:bg-indigo-600' },
-    { name: 'View Analytics', icon: ChartBarIcon, color: 'bg-emerald-500 hover:bg-emerald-600' },
-    { name: 'Set Reminder', icon: BellIcon, color: 'bg-orange-500 hover:bg-orange-600' },
-    { name: 'Join Challenge', icon: UserGroupIcon, color: 'bg-purple-500 hover:bg-purple-600' }
-  ]
-
-  const levelProgress = ((currentUser.honorPoints || 0) % 1000) / 1000 * 100
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'overview':
-        return (
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-            {/* Left Column - Main Content */}
-            <div className="xl:col-span-3 space-y-6">
-              <QuickStats />
-              <HabitOverview />
-              <StreakCalendar />
-            </div>
-            
-            {/* Right Column - Sidebar */}
-            <div className="space-y-6">
-              <AIRecommendations />
-              <UpcomingHabits />
-              <RecentActivity />
-            </div>
-          </div>
-        )
-      
-      case 'habits':
-        return (
-          <div className="space-y-6">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">My Habits</h2>
-              <HabitOverview />
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Habit Calendar</h2>
-              <StreakCalendar />
-            </div>
-          </div>
-        )
-      
-      case 'analytics':
-        return (
-          <div className="space-y-6">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Performance Analytics</h2>
-              <QuickStats />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Streak Analysis</h3>
-                <StreakCalendar />
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Recent Progress</h3>
-                <RecentActivity />
-              </div>
-            </div>
-          </div>
-        )
-      
-      case 'social':
-        return (
-          <div className="space-y-6">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Community Feed</h2>
-              <RecentActivity />
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Leaderboard</h2>
-              <div className="text-center py-8 text-gray-500">
-                <UserGroupIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Community features coming soon!</p>
-              </div>
-            </div>
-          </div>
-        )
-      
-      case 'ai':
-        return (
-          <div className="space-y-6">
-            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl shadow-xl border border-purple-200 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                <SparklesIcon className="h-6 w-6 text-purple-600 mr-2" />
-                AI Recommendations
-              </h2>
-              <AIRecommendations />
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Upcoming Goals</h2>
-              <UpcomingHabits />
-            </div>
-          </div>
-        )
-      
-      default:
-        return null
-    }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/50">
-      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        
-        {/* Premium Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 mb-8"
-        >
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between">
-            <div className="flex items-center space-x-4 mb-4 lg:mb-0">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold shadow-lg">
-                  {currentUser.name?.charAt(0) || 'U'}
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center">
-                  <div className="w-3 h-3 bg-white rounded-full"></div>
-                </div>
-              </div>
-              <div>
-                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                  Welcome back, {currentUser.name}! 👋
-                </h1>
-                <p className="text-gray-600 mt-1 flex items-center">
-                  <StarIcon className="h-4 w-4 text-yellow-500 mr-1" />
-                  Level {Math.floor((currentUser.honorPoints || 0) / 1000) + 1} • Continue your streak
-                </p>
-                <div className="mt-2 w-48 bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${levelProgress}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center space-x-2 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl px-4 py-2 border border-yellow-200">
-                <TrophyIcon className="h-5 w-5 text-yellow-600" />
-                <span className="font-bold text-yellow-700">
-                  {currentUser.honorPoints?.toLocaleString() || 0} HP
-                </span>
-              </div>
-              
-              <div className="flex space-x-2">
-                {quickActions.map((action) => (
-                  <button
-                    key={action.name}
-                    className={`${action.color} text-white p-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 tooltip`}
-                    title={action.name}
-                  >
-                    <action.icon className="h-5 w-5" />
-                  </button>
-                ))}
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 pt-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Welcome back, {session.user?.name || 'there'}! 👋
+          </h1>
+          <p className="text-gray-600">
+            Here is your simple dashboard - the old version is back!
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="flex items-center">
+              <TrophyIcon className="h-10 w-10 text-yellow-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Honor Points</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.totalHonorPoints}</p>
               </div>
             </div>
           </div>
-        </motion.div>
 
-        {/* Premium Navigation Tabs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="bg-white/60 backdrop-blur-sm rounded-xl shadow-lg border border-white/30 p-2 mb-8"
-        >
-          <nav className="flex space-x-1">
-            {[
-              { id: 'overview', name: 'Overview', icon: ChartBarIcon },
-              { id: 'habits', name: 'My Habits', icon: CalendarIcon },
-              { id: 'analytics', name: 'Analytics', icon: ArrowTrendingUpIcon },
-              { id: 'social', name: 'Community', icon: UserGroupIcon },
-              { id: 'ai', name: 'AI Coach', icon: SparklesIcon }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? 'bg-indigo-500 text-white shadow-lg'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-                }`}
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="flex items-center">
+              <FireIcon className="h-10 w-10 text-orange-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Current Streak</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.currentStreak} days</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="flex items-center">
+              <CheckCircleIcon className="h-10 w-10 text-green-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Completed Today</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.completedToday}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="flex items-center">
+              <ChartBarIcon className="h-10 w-10 text-blue-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Active Habits</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.activeHabits}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link
+              href="/habits/create"
+              className="flex items-center space-x-3 p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
+            >
+              <PlusIcon className="h-8 w-8 text-indigo-600" />
+              <div>
+                <h3 className="font-medium text-gray-900">Create Habit</h3>
+                <p className="text-sm text-gray-600">Add a new habit to track</p>
+              </div>
+            </Link>
+
+            <Link
+              href="/habits"
+              className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+            >
+              <CheckCircleIcon className="h-8 w-8 text-green-600" />
+              <div>
+                <h3 className="font-medium text-gray-900">My Habits</h3>
+                <p className="text-sm text-gray-600">View and manage habits</p>
+              </div>
+            </Link>
+
+            <Link
+              href="/analytics"
+              className="flex items-center space-x-3 p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+            >
+              <ChartBarIcon className="h-8 w-8 text-purple-600" />
+              <div>
+                <h3 className="font-medium text-gray-900">Analytics</h3>
+                <p className="text-sm text-gray-600">View detailed progress</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {habits.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Habits</h2>
+            <div className="space-y-3">
+              {habits.slice(0, 5).map((habit) => (
+                <div key={habit._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <h3 className="font-medium text-gray-900">{habit.title}</h3>
+                    <p className="text-sm text-gray-600">{habit.category}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-medium text-indigo-600">
+                      +{habit.honorPointsReward} HP
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4">
+              <Link
+                href="/habits"
+                className="text-indigo-600 hover:text-indigo-700 font-medium"
               >
-                <tab.icon className="h-4 w-4" />
-                <span className="hidden sm:inline">{tab.name}</span>
-              </button>
-            ))}
-          </nav>
-        </motion.div>
+                View all habits →
+              </Link>
+            </div>
+          </div>
+        )}
 
-        {/* Main Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          {renderTabContent()}
-        </motion.div>
+        {habits.length === 0 && (
+          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+            <SparklesIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Ready to start building habits?
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Create your first habit and begin your journey to a better you!
+            </p>
+            <Link
+              href="/habits/create"
+              className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors inline-flex items-center space-x-2"
+            >
+              <PlusIcon className="h-5 w-5" />
+              <span>Create Your First Habit</span>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   )

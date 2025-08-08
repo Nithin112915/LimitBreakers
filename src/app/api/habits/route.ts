@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       isActive: { $ne: false }
     }).sort({ createdAt: -1 })
 
-    return NextResponse.json({ habits })
+    return NextResponse.json(habits)
   } catch (error) {
     console.error('Error fetching habits:', error)
     return NextResponse.json(

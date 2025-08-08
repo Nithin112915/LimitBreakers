@@ -1,7 +1,8 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
 import { Providers } from './providers'
-import { Navigation } from '../components/Layout/Navigation'
+import Layout from '../components/Layout/Layout'
+import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary'
 import { Toaster } from 'react-hot-toast'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -19,15 +20,36 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Providers>
-          <div className="min-h-screen bg-gray-50">
-            <Navigation />
-            <main className="pt-16">
+        <ErrorBoundary>
+          <Providers>
+            <Layout>
               {children}
-            </main>
-            <Toaster position="top-right" />
-          </div>
-        </Providers>
+            </Layout>
+            <Toaster 
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#363636',
+                  color: '#fff',
+                  borderRadius: '10px',
+                },
+                success: {
+                  iconTheme: {
+                    primary: '#10B981',
+                    secondary: '#fff',
+                  },
+                },
+                error: {
+                  iconTheme: {
+                    primary: '#EF4444',
+                    secondary: '#fff',
+                  },
+                },
+              }}
+            />
+          </Providers>
+        </ErrorBoundary>
       </body>
     </html>
   )
