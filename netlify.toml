@@ -13,22 +13,6 @@
 [functions]
   node_bundler = "esbuild"
 
-# API routes redirects  
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/___netlify-server-handler"
-  status = 200
-
-# Next.js pages and app router fallback
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/___netlify-server-handler"
-  status = 200
-
-[dev]
-  command = "npm run dev"
-  port = 3000
-
 # Headers for security
 [[headers]]
   for = "/*"
@@ -37,3 +21,7 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+[dev]
+  command = "npm run dev"
+  port = 3000
