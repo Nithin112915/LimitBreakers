@@ -25,3 +25,15 @@
 [dev]
   command = "npm run dev"
   port = 3000
+
+# Uncomment and add your environment variables below
+# [context.production.environment]
+#   NEXTAUTH_URL = "https://your-site.netlify.app"
+#   MONGODB_URI = "your-mongodb-uri"
+#   OPENAI_API_KEY = "your-openai-key"
+
+# Example: Redirect API routes to Netlify Functions (if needed)
+# [[redirects]]
+#   from = "/api/*"
+#   to = "/.netlify/functions/:splat"
+#   status = 200
