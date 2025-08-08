@@ -21,10 +21,9 @@ const nextConfig = {
     missingSuspenseWithCSRBailout: false,
     serverComponentsExternalPackages: ['mongoose'],
   },
-  // Configure build behavior
-  generateBuildId: async () => {
-    return 'netlify-build'
-  },
+}
+
+module.exports = nextConfig
 }
 
 module.exports = nextConfig
