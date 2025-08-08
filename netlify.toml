@@ -13,16 +13,16 @@
 [functions]
   node_bundler = "esbuild"
 
-# API routes redirects
+# API routes redirects  
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  to = "/.netlify/functions/___netlify-server-handler"
   status = 200
 
-# SPA fallback for client-side routing
+# Next.js pages and app router fallback
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/.netlify/functions/___netlify-server-handler"
   status = 200
 
 [dev]
