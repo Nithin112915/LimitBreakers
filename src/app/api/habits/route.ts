@@ -46,15 +46,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
-    const { 
-      title, 
-      description, 
-      category, 
+    const {
+      title,
+      description,
+      category,
       honorPointsReward,
       frequency,
       reminders,
       proofRequirements,
-      tags 
+      tags,
+      difficulty
     } = await request.json()
 
     if (!title || !category) {
@@ -76,16 +77,24 @@ export async function POST(request: NextRequest) {
     const finalHonorPoints = honorPointsReward || 15
     const honorPointsPenalty = Math.floor(finalHonorPoints * 0.5)
 
+    // Set defaults for required fields
+    const safeDifficulty = difficulty || 'medium'
+    const safeFrequency = frequency && frequency.type ? frequency : { type: 'daily' }
+    const safeProofRequirements = Array.isArray(proofRequirements) && proofRequirements.length > 0
+      ? proofRequirements
+      : [{ type: 'photo', description: 'Proof of completion', isRequired: false }]
+
     const habit = await Habit.create({
       userId: user._id,
       title,
       description,
       category,
+      difficulty: safeDifficulty,
       honorPointsReward: finalHonorPoints,
       honorPointsPenalty,
-      frequency: frequency || { type: 'daily' },
+      frequency: safeFrequency,
       reminders: reminders || [],
-      proofRequirements: proofRequirements || [],
+      proofRequirements: safeProofRequirements,
       tags: tags || [],
       analytics: {
         totalCompletions: 0,
