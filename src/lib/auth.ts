@@ -25,7 +25,7 @@ export const authOptions: NextAuthOptions = {
           await dbConnect()
           console.log('Attempting to find user with email:', credentials.email)
           
-          const user = await User.findOne({ email: credentials.email }).select('+password')
+          const user = await User.findOne({ email: credentials.email })
           
           if (!user) {
             console.log('User not found for email:', credentials.email)

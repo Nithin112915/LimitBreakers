@@ -5,6 +5,25 @@ import { User } from 'src/models/User'
 import { Task } from 'src/models/Task'
 import type { ITask } from 'src/models/Task'
 
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession()
+    if (!session?.user?.email) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
+    await dbConnect()
+    const user = await User.findOne({ email: session.user.email })
+    if (!user) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 })
+    }
+    const tasks: ITask[] = await Task.find({ userId: user._id })
+    return NextResponse.json(tasks, { status: 200 })
+  } catch (error) {
+    console.error('Error fetching habits:', error)
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }

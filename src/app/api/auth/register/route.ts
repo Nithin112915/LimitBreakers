@@ -39,36 +39,29 @@ export async function POST(request: NextRequest) {
 
     await dbConnect()
     
-    // Check if user already exists by email or username
-    const existingUser = await User.findOne({ 
-      $or: [{ email }, { username }] 
-    })
-    if (existingUser) {
-      if (existingUser.email === email) {
-        return NextResponse.json(
-          { message: 'User already exists with this email' },
-          { status: 400 }
-        )
-      } else {
-        return NextResponse.json(
-          { message: 'Username is already taken' },
-          { status: 400 }
-        )
-      }
+    // Check if user already exists by email
+    const existingUserByEmail = await User.findOne({ email })
+    if (existingUserByEmail) {
+      return NextResponse.json(
+        { message: 'User already exists with this email' },
+        { status: 400 }
+      )
+    }
+
+    // Check if username is taken
+    const existingUserByUsername = await User.findOne({ username })
+    if (existingUserByUsername) {
+      return NextResponse.json(
+        { message: 'Username already taken' },
+        { status: 400 }
+      )
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12)
 
     // Generate unique user ID
-    let userId = generateUserId()
-    let userIdExists = await User.findOne({ userId })
-    
-    // Ensure user ID is unique
-    while (userIdExists) {
-      userId = generateUserId()
-      userIdExists = await User.findOne({ userId })
-    }
+    const userId = generateUserId()
 
     // Create new user
     const newUser = new User({
@@ -99,7 +92,7 @@ export async function POST(request: NextRequest) {
       { 
         message: 'User registered successfully',
         user: {
-          id: newUser._id.toString(),
+          id: newUser._id || newUser.id,
           name: newUser.name,
           email: newUser.email,
           honorPoints: newUser.honorPoints,
