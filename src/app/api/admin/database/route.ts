@@ -1,15 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
-import connectDB from '../../../../lib/mongodb'
+import dbConnect from '../../../../lib/mongodb'
 import { User } from '../../../../models/User'
+import { Task } from '../../../../models/Task'
 
 export async function GET() {
   try {
-    await connectDB()
+    await dbConnect()
     
     // Get basic stats
     const totalUsers = await User.countDocuments()
+    const totalTasks = await Task.countDocuments()
+    
     const recentUsers = await User.find()
       .select('name email username userId honorPoints level verified createdAt')
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean()
+
+    const recentTasks = await Task.find()
+      .select('title description category difficulty userId createdAt')
       .sort({ createdAt: -1 })
       .limit(10)
       .lean()
@@ -18,7 +27,9 @@ export async function GET() {
       status: 'success',
       stats: {
         totalUsers,
-        recentUsers: recentUsers.length
+        totalTasks,
+        recentUsers: recentUsers.length,
+        recentTasks: recentTasks.length
       },
       recentUsers: recentUsers.map(user => ({
         id: user._id,
@@ -30,6 +41,15 @@ export async function GET() {
         level: user.level,
         verified: user.verified,
         joinedAt: user.createdAt
+      })),
+      recentTasks: recentTasks.map(task => ({
+        id: task._id,
+        title: task.title,
+        description: task.description,
+        category: task.category,
+        difficulty: task.difficulty,
+        userId: task.userId,
+        createdAt: task.createdAt
       }))
     })
   } catch (error) {

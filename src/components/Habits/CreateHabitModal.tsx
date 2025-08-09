@@ -46,6 +46,7 @@ export default function CreateHabitModal({ isOpen, onClose, onHabitCreated }: Cr
     title: '',
     description: '',
     category: '',
+    difficulty: 'easy',
     frequency: 'daily',
     reminderTime: '',
     proofType: 'none',
@@ -57,6 +58,7 @@ export default function CreateHabitModal({ isOpen, onClose, onHabitCreated }: Cr
       title: '',
       description: '',
       category: '',
+      difficulty: 'easy',
       frequency: 'daily',
       reminderTime: '',
       proofType: 'none',
@@ -76,8 +78,13 @@ export default function CreateHabitModal({ isOpen, onClose, onHabitCreated }: Cr
     
     try {
       const habitData = {
-        ...formData,
-        honorPointsReward: 15, // Default honor points value
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        difficulty: formData.difficulty,
+        frequency: formData.frequency,
+        reminderTime: formData.reminderTime,
+        isPublic: false,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
         proofRequirements: formData.proofType !== 'none' ? [{ type: formData.proofType, description: `Submit ${formData.proofType}` }] : [],
         reminders: formData.reminderTime ? [{ time: formData.reminderTime, isEnabled: true }] : []
@@ -120,7 +127,7 @@ export default function CreateHabitModal({ isOpen, onClose, onHabitCreated }: Cr
       case 2:
         return formData.category
       case 3:
-        return true
+        return formData.difficulty && formData.frequency
       default:
         return false
     }
@@ -304,6 +311,23 @@ export default function CreateHabitModal({ isOpen, onClose, onHabitCreated }: Cr
                           <option value="weekly">Weekly</option>
                           <option value="custom">Custom</option>
                         </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Difficulty Level *
+                        </label>
+                        <select
+                          value={formData.difficulty}
+                          onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          required
+                        >
+                          <option value="easy">🟢 Easy (10 points)</option>
+                          <option value="medium">🟡 Medium (20 points)</option>
+                          <option value="hard">🔴 Hard (30 points)</option>
+                        </select>
+                        <p className="text-sm text-gray-500 mt-1">Higher difficulty = more honor points!</p>
                       </div>
 
                       <div>
