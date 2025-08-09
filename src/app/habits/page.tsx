@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSession } from 'next-auth/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import Loading from '../../components/UI/Loading'
 import HabitCard from '../../components/Habits/HabitCard'
 import CreateHabitModal from '../../components/Habits/CreateHabitModal'
+import SearchParamsHandler from '../../components/Habits/SearchParamsHandler'
 import MobileHabitsPage from '../../components/Mobile/MobileHabitsPage'
 import { useIsMobileApp } from '../../hooks/useMobile'
 import { notificationManager } from '../../lib/notifications'
@@ -52,7 +53,6 @@ interface Habit {
 export default function HabitsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const searchParams = useSearchParams()
   const isMobileApp = useIsMobileApp()
   const [habits, setHabits] = useState<Habit[]>([])
   const [loading, setLoading] = useState(true)
@@ -76,16 +76,6 @@ export default function HabitsPage() {
       setLoading(false) // No session, stop loading
     }
   }, [session, status])
-
-  // Check for create modal parameter
-  useEffect(() => {
-    const createParam = searchParams.get('create')
-    if (createParam === 'true') {
-      setShowCreateModal(true)
-      // Clean up URL without the parameter
-      router.replace('/habits', { scroll: false })
-    }
-  }, [searchParams, router])
 
   const initializeNotifications = async () => {
     const granted = await notificationManager.requestPermission()
@@ -285,6 +275,11 @@ export default function HabitsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      {/* Search params handler wrapped in Suspense */}
+      <Suspense fallback={null}>
+        <SearchParamsHandler onCreateModal={setShowCreateModal} />
+      </Suspense>
+      
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">

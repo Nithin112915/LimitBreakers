@@ -4,8 +4,8 @@ const UserSettingsSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
-    unique: true
+    required: true
+    // Removed unique: true since we have schema.index() below
   },
   // Theme Settings
   theme: {
