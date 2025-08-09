@@ -19,22 +19,24 @@ export default function HomePage() {
   const [showLanding, setShowLanding] = useState(false)
 
   useEffect(() => {
-    console.log('HomePage useEffect - Status:', status, 'Session:', session)
+    console.log('HomePage useEffect - Status:', status, 'Session:', !!session)
     
+    if (status === 'authenticated' && session) {
+      console.log('User authenticated, redirecting to dashboard...')
+      // Use replace for immediate redirect without adding to history
+      window.location.replace('/dashboard')
+      return
+    }
+
     // Set a timeout to show landing page if loading takes too long
     const timeout = setTimeout(() => {
       if (status === 'loading') {
         setShowLanding(true)
       }
-    }, 2000) // Show landing page after 2 seconds of loading
-
-    if (status === 'authenticated' && session) {
-      console.log('Redirecting to dashboard...')
-      router.push('/dashboard')
-    }
+    }, 1500) // Reduced timeout for better UX
 
     return () => clearTimeout(timeout)
-  }, [session, status, router])
+  }, [session, status])
 
   console.log('HomePage render - Status:', status, 'Session:', !!session)
 

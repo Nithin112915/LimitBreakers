@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
       'hard': 30
     }
     const honorPointsReward = difficultyMultiplier[difficulty as keyof typeof difficultyMultiplier] || 10
+    const honorPointsPenalty = Math.floor(honorPointsReward * 0.5) // Penalty is 50% of reward
 
     // Create new habit/task
     const newTask = new Task({
@@ -63,10 +64,20 @@ export async function POST(request: NextRequest) {
       description,
       category,
       difficulty,
-      frequency,
-      reminderTime,
-      isPublic: isPublic || false,
       honorPointsReward,
+      honorPointsPenalty,
+      frequency: {
+        type: frequency,
+        daysOfWeek: frequency === 'daily' ? [0,1,2,3,4,5,6] : []
+      },
+      reminders: reminderTime ? [{
+        time: reminderTime,
+        isEnabled: true,
+        snoozeEnabled: true
+      }] : [],
+      proofRequirements: [],
+      tags: [],
+      isActive: true,
       analytics: {
         totalCompletions: 0,
         currentStreak: 0,
@@ -74,9 +85,7 @@ export async function POST(request: NextRequest) {
         successRate: 0,
         lastUpdated: new Date()
       },
-      completions: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
+      completions: []
     })
 
     await newTask.save()

@@ -70,11 +70,16 @@ export default function OptimizedDashboard() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
 
   useEffect(() => {
+    console.log('Dashboard useEffect - Status:', status, 'Session:', !!session)
+    
     if (status === 'loading') return
+    
     if (session) {
+      console.log('Session found, fetching dashboard data...')
       fetchDashboardData()
       initializeNotifications()
     } else {
+      console.log('No session found, stopping loading...')
       setLoading(false)
     }
   }, [session, status])
@@ -90,10 +95,14 @@ export default function OptimizedDashboard() {
 
   const fetchDashboardData = async () => {
     try {
+      console.log('Fetching habits data...')
       // Fetch habits data
       const habitsResponse = await fetch('/api/habits')
+      console.log('Habits response status:', habitsResponse.status)
+      
       if (habitsResponse.ok) {
         const habitsData = await habitsResponse.json()
+        console.log('Habits data received:', habitsData)
         const habitsArray = Array.isArray(habitsData) ? habitsData : []
         setHabits(habitsArray)
         
