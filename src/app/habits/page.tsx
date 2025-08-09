@@ -350,7 +350,7 @@ export default function HabitsPage() {
               {filteredHabits.map((habit) => (
                 <HabitCard
                   key={habit._id}
-                  habit={habit}
+                  task={habit}
                   onComplete={completeHabit}
                   onToggleStatus={toggleHabitStatus}
                   onEdit={editHabit}

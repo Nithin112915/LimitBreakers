@@ -169,8 +169,15 @@ export async function POST(
     }, { status: 201 })
   } catch (error) {
     console.error('Error completing task:', error)
+    if (error instanceof Error) {
+      console.error('Stack:', error.stack)
+    }
+    try {
+      const body = await request.json();
+      console.error('Request body:', body);
+    } catch {}
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { message: 'Internal server error', error: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }

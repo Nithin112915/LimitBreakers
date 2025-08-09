@@ -1,6 +1,7 @@
 import dbConnect from '../lib/mongodb'
 import { User } from '../models/User'
-import { Habit } from '../models/Habit'
+import { Task } from '../models/Task'
+import type { ITask } from '../models/Task'
 
 const sampleUsers = [
   {
@@ -177,7 +178,7 @@ async function seedDatabase() {
 
     // Clear existing data
     await User.deleteMany({})
-    await Habit.deleteMany({})
+    await Task.deleteMany({})
     console.log('🧹 Cleared existing data')
 
     // Create users
@@ -185,29 +186,26 @@ async function seedDatabase() {
     console.log(`✅ Created ${users.length} users`)
 
     // Create habits and assign to first user
-    const habitsWithUser = sampleHabits.map(habit => ({
+    const tasksWithUser = sampleHabits.map(habit => ({
       ...habit,
       userId: users[0]._id
     }))
 
-    const habits = await Habit.insertMany(habitsWithUser)
-    console.log(`✅ Created ${habits.length} habits`)
+    const tasks = await Task.insertMany(tasksWithUser)
+    console.log(`✅ Created ${tasks.length} tasks`)
 
-    // Add some habit logs for realistic data
+    // Add some task logs for realistic data
     const today = new Date()
-    for (const habit of habits) {
+    for (const task of tasks) {
       const logs: any[] = []
-      
       // Add logs for the past 30 days
       for (let i = 30; i >= 0; i--) {
         const logDate = new Date(today)
         logDate.setDate(logDate.getDate() - i)
-        
-        // Random completion (higher chance for easier habits)
-        const completionChance = habit.difficulty === 'easy' ? 0.9 : 
-                               habit.difficulty === 'medium' ? 0.75 : 0.6
+        // Random completion (higher chance for easier tasks)
+        const completionChance = task.difficulty === 'easy' ? 0.9 : 
+                               task.difficulty === 'medium' ? 0.75 : 0.6
         const completed = Math.random() < completionChance
-        
         if (completed) {
           logs.push({
             date: logDate,
@@ -220,12 +218,10 @@ async function seedDatabase() {
           })
         }
       }
-      
-      habit.logs = logs
-      await habit.save()
+      task.logs = logs
+      await task.save()
     }
-
-    console.log('✅ Added habit logs')
+    console.log('✅ Added task logs')
     console.log('🎉 Database seeding completed successfully!')
     
   } catch (error) {

@@ -3,7 +3,8 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../../../../lib/auth'
 import dbConnect from '../../../../lib/mongodb'
 import { User } from '../../../../models/User'
-import { Habit } from '../../../../models/Habit'
+import { Task } from '../../../../models/Task'
+import type { ITask } from '../../../../models/Task'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,12 +23,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 })
     }
 
-    // Get user's habits
-    const habits = await Habit.find({ userId: user._id })
+    // Get user's tasks
+    const tasks: ITask[] = await Task.find({ userId: user._id })
 
     // Calculate stats
-    const totalHabits = habits.length
-    const activeHabits = habits.filter(habit => habit.isActive !== false).length
+    const totalTasks = tasks.length
+    const activeTasks = tasks.filter((task: ITask) => task.isActive !== false).length
     
     // Calculate completed today
     const today = new Date()
@@ -37,21 +38,20 @@ export async function GET(request: NextRequest) {
     let completedToday = 0
     let totalCompletions = 0
     
-    habits.forEach(habit => {
+    tasks.forEach((task: ITask) => {
       // Check if completed today using completions array
-      const todayCompletion = habit.completions?.find((completion: any) => {
+      const todayCompletion = task.completions?.find((completion: any) => {
         const completionDate = new Date(completion.date)
         return completionDate >= startOfDay && completionDate < endOfDay
       })
       if (todayCompletion) completedToday++
-      
       // Sum up total completions
-      totalCompletions += habit.analytics?.totalCompletions || 0
+      totalCompletions += task.analytics?.totalCompletions || 0
     })
 
     // Calculate success rate based on days since creation
-    const totalPossibleCompletions = habits.reduce((sum, habit) => {
-      const daysSinceCreation = Math.floor((Date.now() - new Date(habit.createdAt).getTime()) / (1000 * 60 * 60 * 24)) + 1
+    const totalPossibleCompletions = tasks.reduce((sum: number, task: ITask) => {
+      const daysSinceCreation = Math.floor((Date.now() - new Date(task.createdAt).getTime()) / (1000 * 60 * 60 * 24)) + 1
       return sum + daysSinceCreation
     }, 0)
     
@@ -68,8 +68,8 @@ export async function GET(request: NextRequest) {
       const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000)
       
       let completed = 0
-      habits.forEach(habit => {
-        const dayCompletion = habit.completions?.find((completion: any) => {
+      tasks.forEach((task: ITask) => {
+        const dayCompletion = task.completions?.find((completion: any) => {
           const completionDate = new Date(completion.date)
           return completionDate >= dayStart && completionDate < dayEnd
         })
@@ -79,18 +79,18 @@ export async function GET(request: NextRequest) {
       weeklyProgress.push({
         day: date.toLocaleDateString('en', { weekday: 'short' }),
         completed,
-        total: activeHabits
+        total: activeTasks
       })
     }
 
     // Category breakdown
     const categoryBreakdown: { [key: string]: { count: number; completed: number } } = {}
-    habits.forEach(habit => {
-      if (!categoryBreakdown[habit.category]) {
-        categoryBreakdown[habit.category] = { count: 0, completed: 0 }
+    tasks.forEach((task: ITask) => {
+      if (!categoryBreakdown[task.category]) {
+        categoryBreakdown[task.category] = { count: 0, completed: 0 }
       }
-      categoryBreakdown[habit.category].count++
-      categoryBreakdown[habit.category].completed += habit.analytics?.totalCompletions || 0
+      categoryBreakdown[task.category].count++
+      categoryBreakdown[task.category].completed += task.analytics?.totalCompletions || 0
     })
 
     const categoryArray = Object.entries(categoryBreakdown).map(([category, data]) => ({
@@ -100,13 +100,13 @@ export async function GET(request: NextRequest) {
     }))
 
     const stats = {
-      totalHabits,
-      activeHabits,
+      totalTasks,
+      activeTasks,
       completedToday,
       honorPoints: user.honorPoints || 0,
       level: user.level || 1,
-      currentStreak: Math.max(...habits.map(h => h.analytics?.currentStreak || 0), 0),
-      longestStreak: Math.max(...habits.map(h => h.analytics?.longestStreak || 0), 0),
+      currentStreak: Math.max(...tasks.map((h: ITask) => h.analytics?.currentStreak || 0), 0),
+      longestStreak: Math.max(...tasks.map((h: ITask) => h.analytics?.longestStreak || 0), 0),
       totalCompletions,
       averageSuccessRate,
       weeklyProgress,

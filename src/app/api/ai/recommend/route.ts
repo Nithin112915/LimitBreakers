@@ -3,7 +3,8 @@ import { getServerSession } from 'next-auth/next'
 import OpenAI from 'openai'
 import dbConnect from '../../../../lib/mongodb'
 import { User } from '../../../../models/User'
-import { Habit } from '../../../../models/Habit'
+import { Task } from '../../../../models/Task'
+import type { ITask } from '../../../../models/Task'
 
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user's habits for context
-    const habits = await Habit.find({ userId: user._id, isActive: true })
+    const tasks: ITask[] = await Task.find({ userId: user._id, isActive: true })
 
     let prompt = ''
     let systemMessage = 'You are an AI personal growth coach. Provide helpful, encouraging, and actionable advice.'
@@ -43,26 +44,26 @@ export async function POST(request: NextRequest) {
       case 'daily_motivation':
         prompt = `Based on the user's current habits and progress, provide a short motivational message for today. 
         User details: Honor Points: ${user.honorPoints}, Level: ${user.level}
-        Active Habits: ${habits.map(h => `${h.title} (${h.category}, ${h.difficulty})`).join(', ')}
+        Active Tasks: ${tasks.map((h: ITask) => `${h.title} (${h.category}, ${h.difficulty})`).join(', ')}
         Keep it under 100 words and personalized.`
         break
 
       case 'habit_suggestions':
         prompt = `Suggest 3 new habits for a user based on their current habits and goals.
-        Current habits: ${habits.map(h => `${h.title} (${h.category})`).join(', ')}
+        Current tasks: ${tasks.map((h: ITask) => `${h.title} (${h.category})`).join(', ')}
         User level: ${user.level}
         Provide specific, actionable habit suggestions with difficulty levels (easy, medium, hard).`
         break
 
       case 'progress_analysis':
-        const habitStats = habits.map(h => ({
+        const taskStats = tasks.map((h: ITask) => ({
           title: h.title,
           streak: h.analytics.currentStreak,
           completions: h.analytics.totalCompletions,
           successRate: h.analytics.successRate
         }))
         prompt = `Analyze the user's habit progress and provide insights:
-        ${JSON.stringify(habitStats, null, 2)}
+        ${JSON.stringify(taskStats, null, 2)}
         Identify patterns, strengths, areas for improvement, and specific recommendations.`
         break
 

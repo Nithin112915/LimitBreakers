@@ -72,32 +72,40 @@ const difficultyColors: { [key: string]: string } = {
 }
 
 const HabitCard = ({ 
-  habit, 
+  task, 
   onComplete, 
   onToggleStatus, 
   onEdit, 
   onDelete, 
   onViewDetails,
   isCompleting = false 
-}: HabitCardProps) => {
+}: {
+  task: any;
+  onComplete: (id: string, proofUrl?: string, proofType?: string, notes?: string) => void;
+  onToggleStatus: (id: string, isActive: boolean) => void;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
+  onViewDetails: (id: string) => void;
+  isCompleting?: boolean;
+}) => {
   const [showProofModal, setShowProofModal] = useState(false)
   const [proofData, setProofData] = useState({ notes: '', file: null as File | null })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const hasCompletedToday = () => {
     const today = new Date().toISOString().split('T')[0]
-    return habit.completions?.some(completion => 
+    return task.completions?.some((completion: any) => 
       completion.date.startsWith(today)
     )
   }
 
-  const requiresProof = habit.proofRequirements && habit.proofRequirements.length > 0
+  const requiresProof = task.proofRequirements && task.proofRequirements.length > 0
 
   const handleCompleteClick = () => {
     if (requiresProof) {
       setShowProofModal(true)
     } else {
-      onComplete(habit._id)
+      onComplete(task._id)
     }
   }
 
@@ -113,9 +121,9 @@ const HabitCard = ({
       }
 
       await onComplete(
-        habit._id, 
+        task._id, 
         proofUrl, 
-        habit.proofRequirements[0]?.type, 
+        task.proofRequirements[0]?.type, 
         proofData.notes
       )
       
@@ -139,7 +147,7 @@ const HabitCard = ({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
         className={`bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200 ${
-          !habit.isActive ? 'opacity-60' : ''
+          !task.isActive ? 'opacity-60' : ''
         }`}
       >
         {/* Header */}
@@ -147,17 +155,17 @@ const HabitCard = ({
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-2">
               <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
-                categoryColors[habit.category] || categoryColors.other
+                categoryColors[task.category] || categoryColors.other
               }`}>
-                {habit.category}
+                {task.category}
               </span>
-              <span className={`text-sm font-bold ${difficultyColors[habit.difficulty || 'easy']}`}>
-                +{habit.honorPointsReward} HP
+              <span className={`text-sm font-bold ${difficultyColors[task.difficulty || 'easy']}`}> 
+                +{task.honorPointsReward} HP
               </span>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">{habit.title}</h3>
-            {habit.description && (
-              <p className="text-gray-600 text-sm line-clamp-2">{habit.description}</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">{task.title}</h3>
+            {task.description && (
+              <p className="text-gray-600 text-sm line-clamp-2">{task.description}</p>
             )}
           </div>
           
@@ -166,7 +174,7 @@ const HabitCard = ({
             {isCompletedToday && (
               <CheckCircleIconSolid className="h-6 w-6 text-green-500" />
             )}
-            {!habit.isActive && (
+            {!task.isActive && (
               <PauseIcon className="h-5 w-5 text-gray-400" />
             )}
           </div>
@@ -178,7 +186,7 @@ const HabitCard = ({
             <div className="flex items-center justify-center space-x-1">
               <FireIcon className="h-4 w-4 text-orange-500" />
               <span className="text-lg font-bold text-gray-900">
-                {habit.analytics?.currentStreak || 0}
+                {task.analytics?.currentStreak || 0}
               </span>
             </div>
             <p className="text-xs text-gray-500">Streak</p>
@@ -187,7 +195,7 @@ const HabitCard = ({
             <div className="flex items-center justify-center space-x-1">
               <CheckCircleIcon className="h-4 w-4 text-green-500" />
               <span className="text-lg font-bold text-gray-900">
-                {habit.analytics?.totalCompletions || 0}
+                {task.analytics?.totalCompletions || 0}
               </span>
             </div>
             <p className="text-xs text-gray-500">Total</p>
@@ -196,7 +204,7 @@ const HabitCard = ({
             <div className="flex items-center justify-center space-x-1">
               <ChartBarIcon className="h-4 w-4 text-blue-500" />
               <span className="text-lg font-bold text-gray-900">
-                {Math.round(habit.analytics?.successRate || 0)}%
+                {Math.round(task.analytics?.successRate || 0)}%
               </span>
             </div>
             <p className="text-xs text-gray-500">Success</p>
@@ -204,9 +212,9 @@ const HabitCard = ({
         </div>
 
         {/* Tags */}
-        {habit.tags && habit.tags.length > 0 && (
+        {task.tags && task.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-4">
-            {habit.tags.slice(0, 3).map((tag, index) => (
+            {task.tags.slice(0, 3).map((tag: string, index: number) => (
               <span
                 key={index}
                 className="flex items-center space-x-1 px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs"
@@ -215,9 +223,9 @@ const HabitCard = ({
                 <span>{tag}</span>
               </span>
             ))}
-            {habit.tags.length > 3 && (
+            {task.tags.length > 3 && (
               <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs">
-                +{habit.tags.length - 3} more
+                +{task.tags.length - 3} more
               </span>
             )}
           </div>
@@ -225,7 +233,7 @@ const HabitCard = ({
 
         {/* Main Action Button */}
         <div className="mb-4">
-          {habit.isActive ? (
+          {task.isActive ? (
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -249,18 +257,14 @@ const HabitCard = ({
                 </>
               ) : (
                 <>
-                  {requiresProof ? (
-                    <CameraIcon className="h-5 w-5" />
-                  ) : (
-                    <CheckCircleIcon className="h-5 w-5" />
-                  )}
+                  <CheckCircleIcon className="h-5 w-5" />
                   <span>Mark Complete</span>
                 </>
               )}
             </motion.button>
           ) : (
             <button
-              onClick={() => onToggleStatus(habit._id, true)}
+            onClick={() => onToggleStatus(task._id, true)}
               className="w-full py-3 px-4 rounded-lg font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors flex items-center justify-center space-x-2"
             >
               <PlayIcon className="h-5 w-5" />
@@ -272,32 +276,32 @@ const HabitCard = ({
         {/* Action Buttons */}
         <div className="grid grid-cols-4 gap-2">
           <button
-            onClick={() => onViewDetails(habit._id)}
+            onClick={() => onViewDetails(task._id)}
             className="flex items-center justify-center p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
             title="View Details"
           >
             <EyeIcon className="h-4 w-4" />
           </button>
           <button
-            onClick={() => onEdit(habit._id)}
+            onClick={() => onEdit(task._id)}
             className="flex items-center justify-center p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
             title="Edit Habit"
           >
             <PencilIcon className="h-4 w-4" />
           </button>
           <button
-            onClick={() => onToggleStatus(habit._id, !habit.isActive)}
+            onClick={() => onToggleStatus(task._id, !task.isActive)}
             className="flex items-center justify-center p-2 text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
-            title={habit.isActive ? 'Pause Habit' : 'Resume Habit'}
+            title={task.isActive ? 'Pause Task' : 'Resume Task'}
           >
-            {habit.isActive ? (
+            {task.isActive ? (
               <PauseIcon className="h-4 w-4" />
             ) : (
               <PlayIcon className="h-4 w-4" />
             )}
           </button>
           <button
-            onClick={() => onDelete(habit._id)}
+            onClick={() => onDelete(task._id)}
             className="flex items-center justify-center p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             title="Delete Habit"
           >
@@ -306,10 +310,10 @@ const HabitCard = ({
         </div>
 
         {/* Reminder */}
-        {habit.reminders && habit.reminders.length > 0 && habit.reminders[0].isEnabled && (
+        {task.reminders && task.reminders.length > 0 && task.reminders[0].isEnabled && (
           <div className="mt-3 flex items-center space-x-2 text-sm text-gray-500">
             <ClockIcon className="h-4 w-4" />
-            <span>Reminder at {habit.reminders[0].time}</span>
+            <span>Reminder at {task.reminders[0].time}</span>
           </div>
         )}
       </motion.div>
@@ -323,16 +327,16 @@ const HabitCard = ({
             className="bg-white rounded-xl p-6 max-w-md w-full"
           >
             <h3 className="text-lg font-semibold mb-4">Submit Proof</h3>
-            
             <div className="space-y-4">
-              {habit.proofRequirements[0]?.type === 'photo' && (
+              {task.proofRequirements[0]?.type === 'photo' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Upload Photo
+                    Upload Photo or File
                   </label>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/*,video/*,application/pdf"
+                    capture="environment"
                     onChange={(e) => setProofData(prev => ({ 
                       ...prev, 
                       file: e.target.files?.[0] || null 
@@ -341,7 +345,6 @@ const HabitCard = ({
                   />
                 </div>
               )}
-              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Notes (Optional)
@@ -355,7 +358,6 @@ const HabitCard = ({
                 />
               </div>
             </div>
-
             <div className="flex space-x-3 mt-6">
               <button
                 onClick={() => setShowProofModal(false)}

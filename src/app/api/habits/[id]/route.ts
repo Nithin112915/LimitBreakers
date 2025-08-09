@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import dbConnect from '../../../../lib/mongodb'
-import { Habit } from '../../../../models/Habit'
+import { Task } from '../../../../models/Task'
+import type { ITask } from '../../../../models/Task'
 import { User } from '../../../../models/User'
 
 export async function GET(
@@ -23,17 +24,14 @@ export async function GET(
       return NextResponse.json({ message: 'User not found' }, { status: 404 })
     }
 
-    const habit = await Habit.findById(params.id)
-    
-    if (!habit) {
-      return NextResponse.json({ message: 'Habit not found' }, { status: 404 })
+    const task: ITask | null = await Task.findById(params.id)
+    if (!task) {
+      return NextResponse.json({ message: 'Task not found' }, { status: 404 })
     }
-
-    if (habit.userId.toString() !== user._id.toString()) {
+    if (task.userId.toString() !== user._id.toString()) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 403 })
     }
-
-    return NextResponse.json({ habit })
+    return NextResponse.json({ task })
   } catch (error) {
     console.error('Error fetching habit:', error)
     return NextResponse.json(
@@ -74,18 +72,15 @@ export async function PUT(
       return NextResponse.json({ message: 'User not found' }, { status: 404 })
     }
 
-    const habit = await Habit.findById(params.id)
-    
-    if (!habit) {
-      return NextResponse.json({ message: 'Habit not found' }, { status: 404 })
+    const task: ITask | null = await Task.findById(params.id)
+    if (!task) {
+      return NextResponse.json({ message: 'Task not found' }, { status: 404 })
     }
-
-    if (habit.userId.toString() !== user._id.toString()) {
+    if (task.userId.toString() !== user._id.toString()) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 403 })
     }
-
-    // Update habit
-    const updatedHabit = await Habit.findByIdAndUpdate(
+    // Update task
+    const updatedTask = await Task.findByIdAndUpdate(
       params.id,
       {
         title,
@@ -101,8 +96,7 @@ export async function PUT(
       },
       { new: true }
     )
-
-    return NextResponse.json({ habit: updatedHabit })
+    return NextResponse.json({ task: updatedTask })
   } catch (error) {
     console.error('Error updating habit:', error)
     return NextResponse.json(
@@ -131,19 +125,15 @@ export async function DELETE(
       return NextResponse.json({ message: 'User not found' }, { status: 404 })
     }
 
-    const habit = await Habit.findById(params.id)
-    
-    if (!habit) {
-      return NextResponse.json({ message: 'Habit not found' }, { status: 404 })
+    const task: ITask | null = await Task.findById(params.id)
+    if (!task) {
+      return NextResponse.json({ message: 'Task not found' }, { status: 404 })
     }
-
-    if (habit.userId.toString() !== user._id.toString()) {
+    if (task.userId.toString() !== user._id.toString()) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 403 })
     }
-
-    await Habit.findByIdAndDelete(params.id)
-
-    return NextResponse.json({ message: 'Habit deleted successfully' })
+    await Task.findByIdAndDelete(params.id)
+    return NextResponse.json({ message: 'Task deleted successfully' })
   } catch (error) {
     console.error('Error deleting habit:', error)
     return NextResponse.json(

@@ -3,7 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import connectToDatabase from '@/lib/mongodb';
 import { User } from '@/models/User';
-import { Habit } from '@/models/Habit';
+import { Task } from '@/models/Task';
+import type { ITask } from '@/models/Task';
 import { checkAchievements, calculateLevelFromPoints } from '@/lib/achievements';
 
 export async function POST(request: NextRequest) {
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     // Find the user and habit
     const user = await User.findOne({ email: session.user.email });
-    const habit = await Habit.findById(habitId);
+    const habit = await Task.findById(habitId);
 
     if (!user || !habit) {
       return NextResponse.json({ error: 'User or habit not found' }, { status: 404 });
@@ -126,15 +127,15 @@ export async function POST(request: NextRequest) {
     user.level = newLevel;
 
     // Check for new achievements
-    const userHabits = await Habit.find({ userId: user._id });
+    const userHabits: ITask[] = await Task.find({ userId: user._id });
     
     // Calculate user stats for achievement checking
     const totalCompletions = userHabits.reduce(
-      (sum, h) => sum + (h.analytics?.totalCompletions || 0),
+      (sum: number, h: ITask) => sum + (h.analytics?.totalCompletions || 0),
       0
     );
     
-    const completedToday = userHabits.filter(h => 
+    const completedToday = userHabits.filter((h: ITask) =>
       h.completions.some((c: any) => {
         const cDate = new Date(c.date);
         cDate.setHours(0, 0, 0, 0);
@@ -143,10 +144,10 @@ export async function POST(request: NextRequest) {
     ).length;
 
     const currentStreak = Math.max(...userHabits.map(h => h.analytics?.currentStreak || 0), 0);
-    const longestStreak = Math.max(...userHabits.map(h => h.analytics?.longestStreak || 0), 0);
+    const longestStreak = Math.max(...userHabits.map((h: ITask) => h.analytics?.longestStreak || 0), 0);
 
     // Category breakdown for achievement checking
-    const categoryBreakdown = userHabits.reduce((acc: any[], habit) => {
+    const categoryBreakdown = userHabits.reduce((acc: any[], habit: ITask) => {
       const existing = acc.find(item => item.category === habit.category);
       const completions = habit.analytics?.totalCompletions || 0;
       

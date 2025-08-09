@@ -1,5 +1,6 @@
 // Notification System for LimitBreakers
-import { Habit } from '../models/Habit'
+import { Task } from '../models/Task'
+import type { ITask } from '../models/Task'
 
 export interface NotificationPermission {
   granted: boolean
