@@ -29,7 +29,7 @@
 # Production environment variables
 [context.production.environment]
   NEXTAUTH_URL = "https://limibreakers.netlify.app"
-  MONGODB_URI = "mongodb://limitbreakerscluster-shard-00-00.5pm5vmp.mongodb.net:27017,limitbreakerscluster-shard-00-01.5pm5vmp.mongodb.net:27017,limitbreakerscluster-shard-00-02.5pm5vmp.mongodb.net:27017/limit-breakers?replicaSet=atlas-14nbhy-shard-0&ssl=true&authSource=admin"
+  MONGODB_URI = "mongodb://thisisnithin1122:Galaxcy1122%40@ac-bpxktke-shard-00-00.5pm5vmp.mongodb.net:27017,ac-bpxktke-shard-00-01.5pm5vmp.mongodb.net:27017,ac-bpxktke-shard-00-02.5pm5vmp.mongodb.net:27017/?ssl=true&authSource=admin&replicaSet=atlas-wit1qd-shard-0&retryWrites=true&w=majority"
   NEXTAUTH_SECRET = "yctmXGAO+a6WEW/YGEaoixz9frh4f4DuzaxBG7iHz/E="
 
 # Example: Redirect API routes to Netlify Functions (if needed)
