@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import connectToDatabase from '@/lib/mongodb';
-import { User } from '@/models/User';
-import { Task } from '@/models/Task';
-import type { ITask } from '@/models/Task';
-import { checkAchievements, calculateLevelFromPoints } from '@/lib/achievements';
+import { authOptions } from '../../../../lib/auth';
+import dbConnect from '../../../../lib/mongodb';
+import { User } from '../../../../models/User';
+import { Task } from '../../../../models/Task';
+import type { ITask } from '../../../../models/Task';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +19,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Habit ID is required' }, { status: 400 });
     }
 
-    await connectToDatabase();
+    await dbConnect();
 
     // Find the user and habit
     const user = await User.findOne({ email: session.user.email });
@@ -122,7 +121,7 @@ export async function POST(request: NextRequest) {
     user.honorPoints = (user.honorPoints || 0) + pointsAwarded;
     
     // Update user level based on points
-    const newLevel = calculateLevelFromPoints(user.honorPoints);
+    const newLevel = Math.floor(user.honorPoints / 1000) + 1;
     const leveledUp = newLevel > (user.level || 1);
     user.level = newLevel;
 
@@ -174,7 +173,25 @@ export async function POST(request: NextRequest) {
       categoryBreakdown
     };
 
-    const newAchievements = checkAchievements(userStats, user.achievements || []);
+    // Simple achievement check
+    const newAchievements = [];
+    if (currentStreak === 7) {
+      newAchievements.push({
+        id: 'week-warrior',
+        title: 'Week Warrior',
+        description: 'Completed a 7-day streak',
+        honorPoints: 50,
+        unlockedAt: new Date()
+      });
+    } else if (currentStreak === 30) {
+      newAchievements.push({
+        id: 'month-master', 
+        title: 'Month Master',
+        description: 'Completed a 30-day streak',
+        honorPoints: 200,
+        unlockedAt: new Date()
+      });
+    }
     
     // Award achievement points and add to user
     let achievementPoints = 0;
@@ -182,11 +199,11 @@ export async function POST(request: NextRequest) {
       for (const achievement of newAchievements) {
         user.achievements = user.achievements || [];
         user.achievements.push(achievement.id);
-        achievementPoints += achievement.reward.points;
+        achievementPoints += achievement.honorPoints;
       }
       user.honorPoints += achievementPoints;
       // Recalculate level after achievement points
-      user.level = calculateLevelFromPoints(user.honorPoints);
+      user.level = Math.floor(user.honorPoints / 1000) + 1;
     }
 
     await user.save();
