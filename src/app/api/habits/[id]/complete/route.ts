@@ -1,3 +1,19 @@
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await dbConnect();
+    const task: ITask | null = await Task.findById(params.id);
+    if (!task) {
+      return NextResponse.json({ message: 'Task not found' }, { status: 404 });
+    }
+    return NextResponse.json(task, { status: 200 });
+  } catch (error) {
+    console.error('Error fetching task:', error);
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+  }
+}
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import dbConnect from '../../../../../lib/mongodb'
