@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
+import { useIsMobileApp } from '@/hooks/useMobile'
+import MobileDashboard from '@/components/Mobile/MobileDashboard'
 import Link from 'next/link'
 import { 
   TrophyIcon,
@@ -54,6 +56,13 @@ interface Habit {
 
 export default function OptimizedDashboard() {
   const { data: session, status } = useSession()
+  const isMobileApp = useIsMobileApp()
+  
+  // If mobile app, use mobile dashboard
+  if (isMobileApp) {
+    return <MobileDashboard />
+  }
+  
   const [stats, setStats] = useState<DashboardStats>({
     totalHonorPoints: 0,
     totalHabits: 0,

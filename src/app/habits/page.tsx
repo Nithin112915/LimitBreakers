@@ -9,6 +9,8 @@ import toast from 'react-hot-toast'
 import Loading from '../../components/UI/Loading'
 import HabitCard from '../../components/Habits/HabitCard'
 import CreateHabitModal from '../../components/Habits/CreateHabitModal'
+import MobileHabitsPage from '../../components/Mobile/MobileHabitsPage'
+import { useIsMobileApp } from '../../hooks/useMobile'
 import { notificationManager } from '../../lib/notifications'
 import {
   PlusIcon,
@@ -51,6 +53,7 @@ export default function HabitsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const isMobileApp = useIsMobileApp()
   const [habits, setHabits] = useState<Habit[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
@@ -58,6 +61,11 @@ export default function HabitsPage() {
   const [completingHabit, setCompletingHabit] = useState<string | null>(null)
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
+
+  // Show mobile version for APK users
+  if (isMobileApp) {
+    return <MobileHabitsPage />
+  }
 
   useEffect(() => {
     if (status === 'loading') return // Still loading

@@ -6,6 +6,8 @@ import Layout from '../components/Layout/Layout'
 import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary'
 import { ThemeProvider } from '../contexts/ThemeContext'
 import { Toaster } from 'react-hot-toast'
+import UpdateNotification from '../components/UpdateNotification'
+import MobileLayout from '../components/Mobile/MobileLayout'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -25,9 +27,12 @@ export default function RootLayout({
         <ErrorBoundary>
           <Providers>
             <ThemeProvider>
-              <Layout>
-                {children}
-              </Layout>
+              <UpdateNotification />
+              <MobileLayout>
+                <Layout>
+                  {children}
+                </Layout>
+              </MobileLayout>
             </ThemeProvider>
             <Toaster 
               position="top-right"
