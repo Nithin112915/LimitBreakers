@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../../../lib/auth'
 import dbConnect from '../../../lib/mongodb'
-import { Habit } from '../../../models/Habit'
+import { Task } from '../../../models/Task'
 import { User } from '../../../models/User'
 
 export const dynamic = 'force-dynamic'
@@ -23,12 +23,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 })
     }
 
-    const habits = await Habit.find({ 
+    const tasks = await Task.find({ 
       userId: user._id, 
       isActive: { $ne: false }
     }).sort({ createdAt: -1 })
 
-    return NextResponse.json(habits)
+    return NextResponse.json(tasks)
   } catch (error) {
     console.error('Error fetching habits:', error)
     return NextResponse.json(
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       ? proofRequirements
       : [{ type: 'photo', description: 'Proof of completion', isRequired: false }]
 
-    const habit = await Habit.create({
+    const task = await Task.create({
       userId: user._id,
       title,
       description,
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({ habit }, { status: 201 })
+    return NextResponse.json({ task }, { status: 201 })
   } catch (error) {
     console.error('Error creating habit:', error)
     return NextResponse.json(

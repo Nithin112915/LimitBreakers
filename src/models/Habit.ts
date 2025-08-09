@@ -1,20 +1,20 @@
 import mongoose, { Schema, Document } from 'mongoose'
 
-export interface IHabit extends Document {
+export interface ITask extends Document {
   userId: mongoose.Types.ObjectId
   title: string
   description?: string
   category: 'health' | 'fitness' | 'learning' | 'productivity' | 'mindfulness' | 'social' | 'other'
-  difficulty?: 'easy' | 'medium' | 'hard' // Made optional for backward compatibility
+  difficulty?: 'easy' | 'medium' | 'hard'
   honorPointsReward: number
   honorPointsPenalty: number
   frequency: {
     type: 'daily' | 'weekly' | 'custom'
-    daysOfWeek?: number[] // 0-6, Sunday to Saturday
+    daysOfWeek?: number[]
     customSchedule?: Date[]
   }
   reminders: {
-    time?: string // HH:MM format
+    time?: string
     location?: string
     isEnabled: boolean
     snoozeEnabled: boolean
@@ -42,12 +42,12 @@ export interface IHabit extends Document {
     totalCompletions: number
     currentStreak: number
     longestStreak: number
-    successRate: number // percentage
+    successRate: number
     lastUpdated: Date
   }
 }
 
-const HabitSchema = new Schema<IHabit>({
+const TaskSchema = new Schema<ITask>({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   title: { type: String, required: true },
   description: { type: String },
@@ -119,8 +119,8 @@ const HabitSchema = new Schema<IHabit>({
 })
 
 // Index for efficient queries
-HabitSchema.index({ userId: 1, isActive: 1 })
-HabitSchema.index({ category: 1 })
-HabitSchema.index({ 'completions.date': 1 })
+TaskSchema.index({ userId: 1, isActive: 1 })
+TaskSchema.index({ category: 1 })
+TaskSchema.index({ 'completions.date': 1 })
 
-export const Habit = mongoose.models.Habit || mongoose.model<IHabit>('Habit', HabitSchema)
+export const Task = mongoose.models.Task || mongoose.model<ITask>('Task', TaskSchema)
