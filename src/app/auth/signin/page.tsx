@@ -23,16 +23,21 @@ export default function SignInPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: true,
+        redirect: false,  // Disable automatic redirect
         callbackUrl: '/dashboard'
       })
 
       console.log('Sign-in result:', result)
 
-      // This code should only run if redirect is false
       if (result?.error) {
         console.log('Sign-in error:', result.error)
         toast.error('Invalid email or password')
+        setIsLoading(false)
+      } else if (result?.ok) {
+        console.log('Sign-in successful, redirecting to dashboard...')
+        toast.success('Welcome back!')
+        // Manual redirect to dashboard
+        router.push('/dashboard')
       }
     } catch (error) {
       console.error('Sign-in error:', error)
