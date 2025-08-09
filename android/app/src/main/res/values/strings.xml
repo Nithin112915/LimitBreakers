@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LimitBreakers</string>
+    <string name="title_activity_main">LimitBreakers</string>
+    <string name="package_name">com.limitbreakers.app</string>
+    <string name="custom_url_scheme">com.limitbreakers.app</string>
+</resources>

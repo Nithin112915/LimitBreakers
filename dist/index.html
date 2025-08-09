@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LimitBreakers - Personal Growth Platform</title>
+    <meta name="description" content="AI-driven personal growth and habit tracking platform">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#4F46E5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="LimitBreakers">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .loading-container {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .loading-text {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .redirect-btn {
+            margin-top: 2rem;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .redirect-btn:hover {
+            background: white;
+            color: #4F46E5;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="logo">🚀 LimitBreakers</div>
+        <div class="loading-text">AI-Driven Personal Growth Platform</div>
+        <div class="spinner"></div>
+        <a href="https://limibreakers.netlify.app" class="redirect-btn">
+            Open LimitBreakers
+        </a>
+    </div>
+    
+    <script>
+        // Auto-redirect to the web app
+        setTimeout(() => {
+            window.location.href = 'https://limibreakers.netlify.app';
+        }, 3000);
+        
+        // Handle Capacitor if available
+        if (window.Capacitor) {
+            document.addEventListener('DOMContentLoaded', () => {
+                import('@capacitor/core').then(({ Capacitor }) => {
+                    if (Capacitor.isNativePlatform()) {
+                        // Initialize mobile-specific features
+                        import('@capacitor/status-bar').then(({ StatusBar }) => {
+                            StatusBar.setStyle({ style: 'DARK' });
+                        });
+                        
+                        import('@capacitor/splash-screen').then(({ SplashScreen }) => {
+                            SplashScreen.hide();
+                        });
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

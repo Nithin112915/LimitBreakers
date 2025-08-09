@@ -16,7 +16,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   swcMinify: true,
-  trailingSlash: false,
+  trailingSlash: true,
   experimental: {
     missingSuspenseWithCSRBailout: false,
     serverComponentsExternalPackages: ['mongoose'],
