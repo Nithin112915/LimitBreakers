@@ -22,12 +22,6 @@ if (!global.mongoose) {
 }
 
 async function dbConnect() {
-  // Only skip database connection during actual build process, not runtime
-  if (typeof window === 'undefined' && process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build') {
-    console.log('⚠️ Skipping database connection during build')
-    return null
-  }
-
   if (cached.conn) {
     return cached.conn
   }

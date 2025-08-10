@@ -6,15 +6,6 @@ export async function GET() {
   try {
     console.log('🔄 Testing database connection via API...')
     
-    // Only skip during actual build phase, not runtime
-    if (typeof window === 'undefined' && process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build') {
-      return NextResponse.json({
-        success: true,
-        message: 'Database test skipped during build',
-        buildTime: true
-      })
-    }
-    
     // Test database connection
     const connection = await dbConnect()
     if (!connection) {
