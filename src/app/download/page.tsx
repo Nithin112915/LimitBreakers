@@ -21,8 +21,8 @@ export default function DownloadPage() {
     try {
       setDownloadStatus('Preparing download...')
       
-      // Use direct static file link instead of API route
-      const apkUrl = '/app.apk'
+      // Use API route to serve the APK file
+      const apkUrl = '/api/files?name=app.apk'
       
       setDownloadStatus('Starting download...')
       
