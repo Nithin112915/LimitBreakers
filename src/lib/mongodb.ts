@@ -22,6 +22,12 @@ if (!global.mongoose) {
 }
 
 async function dbConnect() {
+  // Skip database connection during build time
+  if (process.env.NETLIFY_BUILD === 'true' || process.env.NODE_ENV === 'development' && !MONGODB_URI) {
+    console.log('⚠️ Skipping database connection during build')
+    return null
+  }
+
   if (cached.conn) {
     return cached.conn
   }
@@ -33,6 +39,10 @@ async function dbConnect() {
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
       return mongoose
+    }).catch((error) => {
+      console.error('❌ Database connection error:', error)
+      cached.promise = null
+      throw error
     })
   }
 
@@ -40,6 +50,7 @@ async function dbConnect() {
     cached.conn = await cached.promise
   } catch (e) {
     cached.promise = null
+    console.error('❌ Database connection failed:', e)
     throw e
   }
 
