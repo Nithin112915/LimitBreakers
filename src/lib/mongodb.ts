@@ -23,7 +23,7 @@ if (!global.mongoose) {
 
 async function dbConnect() {
   // Skip database connection during build time
-  if (process.env.NETLIFY_BUILD === 'true' || process.env.NODE_ENV === 'development' && !MONGODB_URI) {
+  if (process.env.NETLIFY_BUILD === 'true') {
     console.log('⚠️ Skipping database connection during build')
     return null
   }
@@ -35,9 +35,14 @@ async function dbConnect() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      maxPoolSize: 10, // Maintain up to 10 socket connections
+      serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      bufferMaxEntries: 0 // Disable mongoose buffering
     }
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      console.log('✅ MongoDB connected successfully')
       return mongoose
     }).catch((error) => {
       console.error('❌ Database connection error:', error)
