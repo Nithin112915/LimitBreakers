@@ -7,7 +7,8 @@ import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary'
 import { ThemeProvider } from '../contexts/ThemeContext'
 import { Toaster } from 'react-hot-toast'
 import UpdateNotification from '../components/UpdateNotification'
-import MobileLayout from '../components/Mobile/MobileLayout'
+import APKUpdateNotification from '../components/APKUpdateNotification'
+import MobileLayout from '../components/Layout/MobileLayout'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,6 +29,7 @@ export default function RootLayout({
           <Providers>
             <ThemeProvider>
               <UpdateNotification />
+              <APKUpdateNotification />
               <MobileLayout>
                 <Layout>
                   {children}
