@@ -1,0 +1,20 @@
+# Limit Breakers Premium APK v2.0.0
+# Build Date: 2025-08-10
+# 
+# This is a placeholder APK file for demonstration.
+# In production, this would be the actual compiled Android APK.
+#
+# Features included in this version:
+# - Premium mobile UI with glassmorphism effects
+# - Task management with custom notifications
+# - Offline functionality
+# - Enhanced honor points system
+# - Mobile-optimized components
+#
+# To build the actual APK, run:
+# npm run build
+# npx cap sync android
+# npx cap build android
+#
+# File would typically be located at:
+# android/app/build/outputs/apk/release/app-release.apk
