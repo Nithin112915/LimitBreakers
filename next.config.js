@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
+  distDir: 'out',
   images: {
-    domains: ['localhost', 'limit-breakers.com'],
+    domains: ['localhost', 'limit-breakers.com', 'limitbreakers.netlify.app'],
     unoptimized: true,
   },
   env: {
@@ -17,9 +19,26 @@ const nextConfig = {
   },
   swcMinify: true,
   trailingSlash: true,
+  assetPrefix: process.env.NODE_ENV === 'production' ? 'https://limitbreakers.netlify.app' : '',
   experimental: {
     missingSuspenseWithCSRBailout: false,
     serverComponentsExternalPackages: ['mongoose'],
+  },
+  // Mobile app optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  // PWA and mobile enhancements
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      }
+    }
+    return config
   },
 }
 

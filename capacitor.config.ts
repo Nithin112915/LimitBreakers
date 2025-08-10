@@ -2,20 +2,44 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.limitbreakers.app',
-  appName: 'LimitBreakers',
-  webDir: 'dist',
+  appName: 'LimitBreakers - Premium',
+  webDir: 'out',
   server: {
-    url: 'https://limibreakers.netlify.app',
+    url: 'https://limitbreakers.netlify.app',
     cleartext: true
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 2000,
+      launchShowDuration: 3000,
       backgroundColor: "#4F46E5",
-      showSpinner: false
+      showSpinner: false,
+      androidSpinnerStyle: "large",
+      iosSpinnerStyle: "large",
+      spinnerColor: "#ffffff",
+      splashFullScreen: true,
+      splashImmersive: true
     },
     StatusBar: {
-      style: 'default'
+      style: 'dark',
+      backgroundColor: '#4F46E5'
+    },
+    Keyboard: {
+      resize: 'body',
+      style: 'dark',
+      resizeOnFullScreen: true
+    },
+    App: {
+      launchAutoHide: false
+    }
+  },
+  android: {
+    buildOptions: {
+      keystorePath: undefined,
+      keystoreAlias: undefined,
+      keystoreAliasPassword: undefined,
+      keystorePassword: undefined,
+      releaseType: 'APK',
+      signingType: 'apksigner'
     }
   }
 };
