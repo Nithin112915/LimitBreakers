@@ -6,7 +6,6 @@ import { User } from '../../../../models/User'
 import { Task } from '../../../../models/Task'
 import type { ITask } from '../../../../models/Task'
 
-export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {

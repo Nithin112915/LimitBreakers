@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // Conditionally set output based on build target
+  ...(process.env.BUILD_TARGET === 'mobile' ? {} : { output: 'export' }),
   distDir: 'out',
   images: {
     domains: ['localhost', 'limit-breakers.com', 'limitbreakers.netlify.app'],

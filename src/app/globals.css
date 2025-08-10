@@ -5,7 +5,7 @@
 /* Premium Custom Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
-/* Import mobile-specific styles */
+/* Mobile-specific styles for APK */
 @import '../styles/mobile.css';
 
 /* Custom global styles with premium look */
@@ -57,7 +57,7 @@ a {
   }
 
   .premium-card {
-    @apply bg-gradient-to-br from-white via-white to-indigo-50/50 rounded-3xl shadow-2xl border border-white/30 p-8 transition-all duration-500 hover:shadow-2xl;
+    @apply bg-gradient-to-br from-white via-white to-indigo-50/50 rounded-3xl shadow-2xl border border-white/30 p-8 transition-all duration-500 hover:shadow-xl;
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
   }
 

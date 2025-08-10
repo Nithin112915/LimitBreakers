@@ -9,7 +9,6 @@ function generateUserId(): string {
   return `LB${randomNum.toString().slice(-6)}`
 }
 
-export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {

@@ -5,7 +5,6 @@ import connectDB from '../../../lib/mongodb'
 import { Notification } from '../../../models/Notification'
 import { User } from '../../../models/User'
 
-export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {

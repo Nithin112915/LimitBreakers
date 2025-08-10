@@ -12,7 +12,8 @@ import {
   CalendarIcon,
   ChatBubbleLeftRightIcon,
   UsersIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/outline'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -22,13 +23,14 @@ export function Navigation() {
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: ChartBarIcon },
-    { name: 'Habits', href: '/habits', icon: CalendarIcon },
+    { name: 'Tasks', href: '/habits', icon: CalendarIcon },
     { name: 'Achievements', href: '/achievements', icon: TrophyIcon },
     { name: 'Social', href: '/social', icon: UsersIcon },
     { name: 'Discover', href: '/discover', icon: MagnifyingGlassIcon },
     { name: 'Community', href: '/community', icon: UserIcon },
     { name: 'AI Companion', href: '/coach', icon: ChatBubbleLeftRightIcon },
     { name: 'Leaderboard', href: '/leaderboard', icon: TrophyIcon },
+    { name: 'Download', href: '/download', icon: ArrowDownTrayIcon },
   ]
 
   return (

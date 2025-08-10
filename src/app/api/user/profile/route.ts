@@ -5,7 +5,6 @@ import connectDB from '../../../../lib/mongodb'
 import { User } from '../../../../models/User'
 
 // Force dynamic rendering
-export const dynamic = 'force-dynamic'
 
 // GET - Get current user profile
 export async function GET() {
