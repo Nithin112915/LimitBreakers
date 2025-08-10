@@ -4,6 +4,7 @@ import { useState, Fragment } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
+import { reminderManager } from '@/lib/reminderManager'
 import {
   BookOpenIcon,
   HeartIcon,
@@ -82,12 +83,15 @@ export default function CreateHabitModal({ isOpen, onClose, onHabitCreated }: Cr
         description: formData.description,
         category: formData.category,
         difficulty: formData.difficulty,
-        frequency: formData.frequency,
+        frequency: {
+          type: formData.frequency,
+          daysOfWeek: [], // Default to empty, can be expanded later
+          customSchedule: []
+        },
         reminderTime: formData.reminderTime,
-        isPublic: false,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
-        proofRequirements: formData.proofType !== 'none' ? [{ type: formData.proofType, description: `Submit ${formData.proofType}` }] : [],
-        reminders: formData.reminderTime ? [{ time: formData.reminderTime, isEnabled: true }] : []
+        requiresProof: formData.proofType !== 'none',
+        proofType: formData.proofType !== 'none' ? formData.proofType : undefined
       }
 
       const response = await fetch('/api/habits', {
@@ -96,13 +100,26 @@ export default function CreateHabitModal({ isOpen, onClose, onHabitCreated }: Cr
         body: JSON.stringify(habitData)
       })
 
-      if (response.ok) {
+      const result = await response.json()
+
+      if (response.ok && result.success) {
         toast.success('Habit created successfully! 🎉')
+        
+        // Schedule reminder if reminder time is set
+        if (formData.reminderTime && result.habit && reminderManager) {
+          try {
+            await reminderManager.scheduleHabitReminders([result.habit])
+            toast.success('Reminder scheduled! 🔔')
+          } catch (error) {
+            console.error('Error scheduling reminder:', error)
+            toast.error('Habit created but reminder scheduling failed')
+          }
+        }
+        
         handleClose()
         onHabitCreated()
       } else {
-        const error = await response.json().catch(() => ({ message: 'Failed to create habit' }))
-        toast.error(error.message || 'Failed to create habit')
+        toast.error(result.message || 'Failed to create habit')
       }
     } catch (error) {
       console.error('Error creating habit:', error)

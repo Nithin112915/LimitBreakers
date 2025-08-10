@@ -19,6 +19,11 @@ export interface ITask extends Document {
     isEnabled: boolean
     snoozeEnabled: boolean
   }[]
+  schedule?: {
+    time?: string
+    daysOfWeek?: number[]
+    isEnabled: boolean
+  }
   proofRequirements: {
     type: 'photo' | 'document' | 'video' | 'text'
     description: string
@@ -78,6 +83,11 @@ const TaskSchema = new Schema<ITask>({
     isEnabled: { type: Boolean, default: true },
     snoozeEnabled: { type: Boolean, default: true }
   }],
+  schedule: {
+    time: { type: String }, // Time in HH:MM format for reminder manager
+    daysOfWeek: [{ type: Number, min: 0, max: 6 }], // 0-6 for Sunday-Saturday
+    isEnabled: { type: Boolean, default: true }
+  },
   proofRequirements: [{
     type: { 
       type: String, 

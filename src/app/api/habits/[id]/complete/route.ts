@@ -1,3 +1,11 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '../../../../../lib/auth'
+import dbConnect from '../../../../../lib/mongodb'
+import { Task } from '../../../../../models/Task'
+import type { ITask } from '../../../../../models/Task'
+import { User } from '../../../../../models/User'
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -14,19 +22,13 @@ export async function GET(
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }
-import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import dbConnect from '../../../../../lib/mongodb'
-import { Task } from '../../../../../models/Task'
-import type { ITask } from '../../../../../models/Task'
-import { User } from '../../../../../models/User'
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
     
     if (!session?.user?.email) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })

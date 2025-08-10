@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import { 
   TrophyIcon,
   FireIcon,
@@ -10,438 +11,503 @@ import {
   ChartBarIcon,
   PlusIcon,
   SparklesIcon,
-  BellIcon
+  BellIcon,
+  ArrowUpIcon,
+  CalendarIcon,
+  UserIcon
 } from '@heroicons/react/24/outline'
-import { notificationManager, getUpcomingHabits, isHabitCompletedToday } from '../../lib/notifications'
 import toast from 'react-hot-toast'
+import { reminderManager } from '@/lib/reminderManager'
 
-interface DashboardStats {
-  totalHonorPoints: number
-  totalHabits: number
-  activeHabits: number
-  completedToday: number
-  currentStreak: number
-  longestStreak: number
-  level: number
-  completionRate: number
-}
-
-interface Habit {
-  _id: string
-  title: string
-  description: string
-  category: string
-  difficulty?: string
-  honorPointsReward: number
-  isActive: boolean
-  reminders: Array<{
-    time: string
-    isEnabled: boolean
-  }>
-  analytics: {
-    totalCompletions: number
-    currentStreak: number
+interface DashboardData {
+  user: {
+    name: string
+    honorPoints: number
+    level: number
+    streak: number
     longestStreak: number
-    successRate: number
   }
-  completions: Array<{
+  today: {
+    completed: number
+    pending: number
+    total: number
+  }
+  overview: {
+    totalHabits: number
+    activeHabits: number
+    totalCompletions: number
+    averageStreak: number
+  }
+  weeklyActivity: Array<{
     date: string
-    proofUrl?: string
-    proofType?: string
-    notes?: string
+    completions: number
   }>
+  categoryStats: Record<string, {
+    total: number
+    completed: number
+    successRate: number
+  }>
+  recentCompletions: Array<{
+    taskId: string
+    taskTitle: string
+    taskCategory: string
+    date: string
+    honorPointsAwarded: number
+  }>
+  motivationalQuote: string
 }
 
-export default function OptimizedDashboard() {
+export default function DashboardPage() {
   const { data: session, status } = useSession()
-  const [stats, setStats] = useState<DashboardStats>({
-    totalHonorPoints: 0,
-    totalHabits: 0,
-    activeHabits: 0,
-    completedToday: 0,
-    currentStreak: 0,
-    longestStreak: 0,
-    level: 1,
-    completionRate: 0
-  })
-  const [habits, setHabits] = useState<Habit[]>([])
-  const [upcomingHabits, setUpcomingHabits] = useState<any[]>([])
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
+  const [upcomingReminders, setUpcomingReminders] = useState<any[]>([])
 
   useEffect(() => {
     if (status === 'loading') return
-    if (session) {
-      fetchDashboardData()
-      initializeNotifications()
-    } else {
-      setLoading(false)
+    if (status === 'unauthenticated') {
+      window.location.href = '/auth/signin'
+      return
     }
-  }, [session, status])
+    if (status === 'authenticated') {
+      fetchDashboardData()
+      checkNotificationPermission()
+      loadUpcomingReminders()
+    }
+  }, [status])
 
-  const initializeNotifications = async () => {
-    const granted = await notificationManager.requestPermission()
-    setNotificationsEnabled(granted)
-    
-    if (granted) {
-      toast.success('Notifications enabled! You\'ll receive habit reminders.')
+  const checkNotificationPermission = async () => {
+    if (!reminderManager) return
+    const permission = await reminderManager.requestPermission()
+    setNotificationsEnabled(permission)
+  }
+
+  const loadUpcomingReminders = async () => {
+    try {
+      const response = await fetch('/api/habits?upcoming=true')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          // Filter habits with scheduled times for today/tomorrow
+          const now = new Date()
+          const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+          
+          const reminders = data.habits
+            .filter((habit: any) => habit.schedule?.time)
+            .map((habit: any) => {
+              const [hours, minutes] = habit.schedule.time.split(':').map(Number)
+              const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes)
+              const tomorrowSchedule = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), hours, minutes)
+              
+              if (today > now) {
+                return { ...habit, nextReminder: today, isToday: true }
+              } else {
+                return { ...habit, nextReminder: tomorrowSchedule, isToday: false }
+              }
+            })
+            .sort((a: any, b: any) => a.nextReminder.getTime() - b.nextReminder.getTime())
+            .slice(0, 5) // Show next 5 reminders
+          
+          setUpcomingReminders(reminders)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading upcoming reminders:', error)
+    }
+  }
+
+  const toggleNotifications = async () => {
+    if (!reminderManager) {
+      toast.error('Notification system not available')
+      return
+    }
+
+    if (!notificationsEnabled) {
+      const permission = await reminderManager.requestPermission()
+      if (permission) {
+        setNotificationsEnabled(true)
+        toast.success('Notifications enabled! 🔔')
+        // Schedule reminders for all habits
+        await scheduleAllHabitReminders()
+      } else {
+        toast.error('Please enable notifications in your browser settings')
+      }
+    } else {
+      setNotificationsEnabled(false)
+      toast.success('Notifications disabled')
+    }
+  }
+
+  const scheduleAllHabitReminders = async () => {
+    if (!reminderManager) return
+
+    try {
+      const response = await fetch('/api/habits')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          await reminderManager.scheduleHabitReminders(data.habits)
+          toast.success('Habit reminders scheduled! ⏰')
+        }
+      }
+    } catch (error) {
+      console.error('Error scheduling reminders:', error)
+      toast.error('Failed to schedule reminders')
+    }
+  }
+
+  const testReminder = async () => {
+    if (!reminderManager) {
+      toast.error('Notification system not available')
+      return
+    }
+
+    try {
+      await reminderManager.sendTestNotification()
+      toast.success('Test notification sent!')
+    } catch (error) {
+      console.error('Error sending test reminder:', error)
+      toast.error('Failed to send test notification')
     }
   }
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch habits data
-      const habitsResponse = await fetch('/api/habits')
-      if (habitsResponse.ok) {
-        const habitsData = await habitsResponse.json()
-        const habitsArray = Array.isArray(habitsData) ? habitsData : []
-        setHabits(habitsArray)
-        
-        // Calculate comprehensive stats
-        const today = new Date().toISOString().split('T')[0]
-        const completedToday = habitsArray.filter(h => 
-          isHabitCompletedToday(h)
-        ).length
-        
-        const activeHabits = habitsArray.filter(h => h.isActive).length
-        const totalCompletions = habitsArray.reduce((sum, h) => 
-          sum + (h.analytics?.totalCompletions || 0), 0
-        )
-        const totalHonorPoints = habitsArray.reduce((sum, h) => 
-          sum + (h.analytics?.totalCompletions || 0) * h.honorPointsReward, 0
-        )
-        
-        // Calculate overall completion rate
-        const totalDaysActive = habitsArray.reduce((sum, h) => {
-          const daysSinceCreation = Math.floor(
-            (Date.now() - new Date(h.createdAt || Date.now()).getTime()) / (1000 * 60 * 60 * 24)
-          ) + 1
-          return sum + daysSinceCreation
-        }, 0)
-        
-        const completionRate = totalDaysActive > 0 ? 
-          Math.round((totalCompletions / totalDaysActive) * 100) : 0
-
-        const currentStreak = Math.max(...habitsArray.map(h => h.analytics?.currentStreak || 0), 0)
-        const longestStreak = Math.max(...habitsArray.map(h => h.analytics?.longestStreak || 0), 0)
-        const level = Math.floor(totalHonorPoints / 1000) + 1
-
-        setStats({
-          totalHonorPoints,
-          totalHabits: habitsArray.length,
-          activeHabits,
-          completedToday,
-          currentStreak,
-          longestStreak,
-          level,
-          completionRate
-        })
-
-        // Calculate upcoming habits
-        const upcoming = getUpcomingHabits(habitsArray)
-        setUpcomingHabits(upcoming.slice(0, 5))
-
-        // Schedule notifications for all habits
-        if (notificationsEnabled) {
-          notificationManager.scheduleAllHabitReminders(habitsArray)
-        }
+      setLoading(true)
+      const response = await fetch('/api/dashboard')
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard data')
+      }
+      
+      const data = await response.json()
+      if (data.success) {
+        setDashboardData(data.data)
+      } else {
+        throw new Error(data.message || 'Failed to load dashboard')
       }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error)
+      console.error('Dashboard fetch error:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load dashboard')
       toast.error('Failed to load dashboard data')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleQuickComplete = async (habitId: string) => {
-    try {
-      const response = await fetch(`/api/habits/${habitId}/complete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        toast.success(`+${result.honorPointsEarned} Honor Points! 🎉`)
-        
-        // Show achievement notifications
-        if (result.achievements?.length > 0) {
-          result.achievements.forEach((achievement: any) => {
-            notificationManager.showAchievementNotification(
-              achievement.title,
-              achievement.description,
-              achievement.honorPoints
-            )
-          })
-        }
-
-        // Show streak notification
-        if (result.newStreak > 1 && result.newStreak % 7 === 0) {
-          notificationManager.showStreakNotification(result.newStreak, habits.find(h => h._id === habitId)?.title || 'Habit')
-        }
-
-        // Refresh dashboard data
-        fetchDashboardData()
-      } else {
-        const error = await response.json()
-        toast.error(error.message || 'Failed to complete habit')
-      }
-    } catch (error) {
-      console.error('Error completing habit:', error)
-      toast.error('Failed to complete habit')
-    }
-  }
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen gradient-primary flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading your dashboard...</p>
         </div>
       </div>
     )
   }
 
-  if (!session) {
+  if (error || !dashboardData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 pt-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Welcome to LimitBreakers</h1>
-            <p className="text-gray-600 mb-8">Please sign in to access your dashboard.</p>
-            <Link
-              href="/auth/signin"
-              className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              Sign In
-            </Link>
-          </div>
+      <div className="min-h-screen gradient-primary flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-300 text-lg mb-4">{error || 'Failed to load dashboard'}</p>
+          <button
+            onClick={fetchDashboardData}
+            className="btn-primary"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     )
   }
+
+  const { user, today, overview, weeklyActivity, categoryStats, recentCompletions, motivationalQuote } = dashboardData
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 pt-20">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {session.user?.name || 'Champion'}! 👋
+    <div className="min-h-screen gradient-primary py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          <h1 className="text-4xl font-bold text-white mb-2">
+            Welcome back, {user.name}! 🎯
           </h1>
-          <p className="text-gray-600">
-            Level {stats.level} • {stats.completionRate}% success rate this period
+          <p className="text-xl text-white/80">
+            {motivationalQuote}
           </p>
-          
-          {!notificationsEnabled && (
-            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex items-center">
-                <BellIcon className="h-5 w-5 text-yellow-600 mr-2" />
-                <div className="flex-1">
-                  <p className="text-sm text-yellow-800">
-                    Enable notifications to receive habit reminders
+        </motion.div>
+
+        {/* Notification Controls & Upcoming Reminders */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8"
+        >
+          {/* Notification Controls */}
+          <div className="premium-card">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <BellIcon className="w-6 h-6 text-purple-600" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Habit Reminders
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Get notified when it's time to complete your habits
                   </p>
                 </div>
-                <button
-                  onClick={initializeNotifications}
-                  className="text-sm bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700"
-                >
-                  Enable
-                </button>
               </div>
+              <button
+                onClick={toggleNotifications}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  notificationsEnabled 
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500' 
+                    : 'bg-gray-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    notificationsEnabled ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
             </div>
-          )}
-        </div>
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                {notificationsEnabled ? (
+                  <span className="text-green-600 flex items-center">
+                    <CheckCircleIcon className="w-4 h-4 mr-1" />
+                    Notifications enabled
+                  </span>
+                ) : (
+                  <span className="text-gray-500">
+                    Click to enable habit reminders
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={testReminder}
+                className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-lg hover:bg-purple-200 transition-colors"
+              >
+                Test Notification
+              </button>
+            </div>
+          </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center">
-              <TrophyIcon className="h-10 w-10 text-yellow-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Honor Points</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalHonorPoints.toLocaleString()}</p>
-                <p className="text-xs text-yellow-600">Level {stats.level}</p>
+          {/* Upcoming Reminders */}
+          <div className="premium-card">
+            <div className="flex items-center space-x-3 mb-4">
+              <CalendarIcon className="w-6 h-6 text-blue-600" />
+              <h3 className="text-lg font-semibold text-gray-900">
+                Upcoming Reminders
+              </h3>
+            </div>
+            {upcomingReminders.length > 0 ? (
+              <div className="space-y-2">
+                {upcomingReminders.map((reminder, index) => (
+                  <div key={reminder._id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-2 h-2 rounded-full ${reminder.isToday ? 'bg-green-500' : 'bg-blue-500'}`} />
+                      <span className="text-sm font-medium text-gray-900">
+                        {reminder.title}
+                      </span>
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {reminder.isToday ? 'Today' : 'Tomorrow'} {reminder.schedule.time}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">
+                No upcoming reminders. Create habits with scheduled times to see them here.
+              </p>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Stats Cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+        >
+          {/* Honor Points */}
+          <div className="premium-card text-center">
+            <TrophyIcon className="w-8 h-8 text-yellow-500 mx-auto mb-3" />
+            <h3 className="text-2xl font-bold text-gray-900">{user.honorPoints.toLocaleString()}</h3>
+            <p className="text-gray-600">Honor Points</p>
+            <div className="mt-2">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                Level {user.level}
+              </span>
+            </div>
+          </div>
+
+          {/* Current Streak */}
+          <div className="premium-card text-center">
+            <FireIcon className="w-8 h-8 text-orange-500 mx-auto mb-3" />
+            <h3 className="text-2xl font-bold text-gray-900">{user.streak}</h3>
+            <p className="text-gray-600">Current Streak</p>
+            <div className="mt-2 text-sm text-gray-500">
+              Best: {user.longestStreak} days
+            </div>
+          </div>
+
+          {/* Today's Progress */}
+          <div className="premium-card text-center">
+            <CheckCircleIcon className="w-8 h-8 text-green-500 mx-auto mb-3" />
+            <h3 className="text-2xl font-bold text-gray-900">{today.completed}/{today.total}</h3>
+            <p className="text-gray-600">Completed Today</p>
+            <div className="mt-2">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${today.total > 0 ? (today.completed / today.total) * 100 : 0}%` }}
+                ></div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center">
-              <FireIcon className="h-10 w-10 text-red-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Current Streak</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.currentStreak} days</p>
-                <p className="text-xs text-red-600">Best: {stats.longestStreak} days</p>
-              </div>
+          {/* Active Habits */}
+          <div className="premium-card text-center">
+            <SparklesIcon className="w-8 h-8 text-purple-500 mx-auto mb-3" />
+            <h3 className="text-2xl font-bold text-gray-900">{overview.activeHabits}</h3>
+            <p className="text-gray-600">Active Habits</p>
+            <div className="mt-2 text-sm text-gray-500">
+              {overview.totalCompletions} total completions
             </div>
           </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center">
-              <CheckCircleIcon className="h-10 w-10 text-green-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Completed Today</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.completedToday}</p>
-                <p className="text-xs text-green-600">of {stats.activeHabits} active</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center">
-              <ChartBarIcon className="h-10 w-10 text-blue-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Success Rate</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.completionRate}%</p>
-                <p className="text-xs text-blue-600">{stats.totalHabits} total habits</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        </motion.div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link
-              href="/habits/create"
-              className="flex items-center space-x-3 p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
-            >
-              <PlusIcon className="h-8 w-8 text-indigo-600" />
-              <div>
-                <h3 className="font-medium text-gray-900">Create Habit</h3>
-                <p className="text-sm text-gray-600">Start a new habit journey</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/habits"
-              className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
-            >
-              <CheckCircleIcon className="h-8 w-8 text-green-600" />
-              <div>
-                <h3 className="font-medium text-gray-900">My Habits</h3>
-                <p className="text-sm text-gray-600">View and manage habits</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/analytics"
-              className="flex items-center space-x-3 p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
-            >
-              <ChartBarIcon className="h-8 w-8 text-purple-600" />
-              <div>
-                <h3 className="font-medium text-gray-900">Analytics</h3>
-                <p className="text-sm text-gray-600">View detailed progress</p>
-              </div>
-            </Link>
-          </div>
-        </div>
-
-        {/* Upcoming Habits */}
-        {upcomingHabits.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Upcoming Habits</h2>
-            <div className="space-y-3">
-              {upcomingHabits.map((habit) => (
-                <div key={habit._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">{habit.title}</h3>
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <span>Next: {habit.reminders?.[0]?.time || 'No time set'}</span>
-                      <span>•</span>
-                      <span>in {habit.timeUntil}</span>
-                      <span>•</span>
-                      <span className="text-indigo-600">+{habit.honorPointsReward} HP</span>
-                    </div>
-                  </div>
-                  
-                  {!isHabitCompletedToday(habit) && (
-                    <button
-                      onClick={() => handleQuickComplete(habit._id)}
-                      className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors text-sm"
-                    >
-                      Complete Now
-                    </button>
-                  )}
-                  
-                  {isHabitCompletedToday(habit) && (
-                    <span className="text-green-600 text-sm font-medium">✓ Completed</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Recent Habits */}
-        {habits.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Your Habits</h2>
-            <div className="space-y-3">
-              {habits.slice(0, 5).map((habit) => {
-                const completedToday = isHabitCompletedToday(habit)
-                return (
-                  <div key={habit._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-medium text-gray-900">{habit.title}</h3>
-                        {completedToday && (
-                          <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        <span className="capitalize">{habit.category}</span>
-                        <span>🔥 {habit.analytics?.currentStreak || 0} days</span>
-                        <span>{habit.analytics?.successRate || 0}% success</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm font-medium text-indigo-600">
-                        +{habit.honorPointsReward} HP
-                      </span>
-                      <div className="text-xs text-gray-500 capitalize">
-                        {habit.difficulty || 'Standard'}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            <div className="mt-4">
-              <Link
-                href="/habits"
-                className="text-indigo-600 hover:text-indigo-700 font-medium"
-              >
-                View all habits →
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8"
+        >
+          <div className="premium-card">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link href="/habits/create" className="btn-primary text-center">
+                <PlusIcon className="w-5 h-5 mx-auto mb-2" />
+                Create New Habit
+              </Link>
+              <Link href="/habits" className="btn-secondary text-center">
+                <CheckCircleIcon className="w-5 h-5 mx-auto mb-2" />
+                View All Habits
+              </Link>
+              <Link href="/analytics" className="btn-accent text-center">
+                <ChartBarIcon className="w-5 h-5 mx-auto mb-2" />
+                View Analytics
               </Link>
             </div>
           </div>
-        )}
+        </motion.div>
 
-        {/* Empty State */}
-        {habits.length === 0 && (
-          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-            <SparklesIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Ready to start building habits?
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Create your first habit and begin your journey to a better you!
-            </p>
-            <Link
-              href="/habits/create"
-              className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors inline-flex items-center space-x-2"
-            >
-              <PlusIcon className="h-5 w-5" />
-              <span>Create Your First Habit</span>
-            </Link>
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Weekly Activity */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="premium-card"
+          >
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Weekly Activity</h3>
+            <div className="space-y-3">
+              {weeklyActivity.map((day, index) => (
+                <div key={day.date} className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">
+                    {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                  </span>
+                  <div className="flex items-center">
+                    <div className="w-24 h-2 bg-gray-200 rounded-full mr-3">
+                      <div 
+                        className="h-2 bg-indigo-600 rounded-full transition-all duration-300"
+                        style={{ width: `${Math.min((day.completions / Math.max(...weeklyActivity.map(d => d.completions), 1)) * 100, 100)}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-600">{day.completions}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Recent Completions */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="premium-card"
+          >
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Recent Completions</h3>
+            <div className="space-y-3">
+              {recentCompletions.length > 0 ? (
+                recentCompletions.slice(0, 5).map((completion, index) => (
+                  <div key={`${completion.taskId}-${index}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="font-medium text-gray-900">{completion.taskTitle}</p>
+                      <p className="text-sm text-gray-600 capitalize">{completion.taskCategory}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-green-600">+{completion.honorPointsAwarded}</p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(completion.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center py-4">No recent completions</p>
+              )}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Category Breakdown */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mt-8 premium-card"
+        >
+          <h3 className="text-xl font-bold text-gray-900 mb-4">Category Breakdown</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Object.entries(categoryStats).map(([category, stats]) => (
+              <div key={category} className="p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-semibold text-gray-900 capitalize mb-2">{category}</h4>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>Total Habits:</span>
+                    <span className="font-medium">{stats.total}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Success Rate:</span>
+                    <span className="font-medium">{stats.successRate}%</span>
+                  </div>
+                </div>
+                <div className="mt-2">
+                  <div className="w-full bg-gray-200 rounded-full h-1">
+                    <div 
+                      className="bg-indigo-600 h-1 rounded-full transition-all duration-300"
+                      style={{ width: `${stats.successRate}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        )}
+        </motion.div>
       </div>
     </div>
   )
