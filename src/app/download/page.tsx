@@ -22,7 +22,7 @@ export default function DownloadPage() {
       setDownloadStatus('Preparing download...')
       
       // Use direct static file link instead of API route
-      const apkUrl = '/downloads/limitbreakers-v2.0.0-premium.apk'
+      const apkUrl = '/app.apk'
       
       setDownloadStatus('Starting download...')
       
