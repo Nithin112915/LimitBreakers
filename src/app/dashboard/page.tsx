@@ -56,7 +56,22 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (status === 'authenticated') {
+    console.log('Dashboard useEffect - status:', status, 'session:', session?.user?.email)
+    
+    if (status === 'loading') {
+      console.log('Authentication loading...')
+      return
+    }
+    
+    if (status === 'unauthenticated') {
+      console.log('User not authenticated')
+      setLoading(false)
+      setError('Please sign in to view your dashboard')
+      return
+    }
+    
+    if (status === 'authenticated' && session?.user) {
+      console.log('User authenticated, fetching dashboard data')
       fetchDashboardData()
     }
   }, [status, session])
@@ -66,16 +81,39 @@ export default function DashboardPage() {
       setLoading(true)
       setError(null)
       
-      const response = await fetch('/api/dashboard')
+      console.log('Fetching dashboard data for session:', session?.user?.email)
+      
+      // Add timeout to prevent infinite loading
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+      
+      const response = await fetch('/api/dashboard', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal
+      })
+      
+      clearTimeout(timeoutId)
+      console.log('Dashboard API response status:', response.status)
+      
       if (!response.ok) {
-        throw new Error('Failed to fetch dashboard data')
+        const errorText = await response.text()
+        console.error('Dashboard API error:', errorText)
+        throw new Error(`Failed to fetch dashboard data: ${response.status}`)
       }
       
       const data = await response.json()
+      console.log('Dashboard data received:', data)
       setDashboardData(data)
     } catch (err) {
       console.error('Dashboard fetch error:', err)
-      setError('Unable to load dashboard data')
+      if (err instanceof Error && err.name === 'AbortError') {
+        setError('Dashboard loading timed out. Please try again.')
+      } else {
+        setError('Unable to load dashboard data')
+      }
       toast.error('Failed to load dashboard data')
     } finally {
       setLoading(false)

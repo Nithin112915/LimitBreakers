@@ -7,17 +7,47 @@ import { Task } from '../../../models/Task'
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('Dashboard API called')
+    
     const session = await getServerSession(authOptions)
+    console.log('Session:', session?.user?.email)
+    
     if (!session?.user?.email) {
+      console.log('Unauthorized - no session or email')
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
+    console.log('Connecting to database...')
     await dbConnect()
+    console.log('Database connected')
 
     // Find the user
+    console.log('Finding user with email:', session.user.email)
     const user = await User.findOne({ email: session.user.email })
+    console.log('User found:', user ? 'Yes' : 'No')
+    
     if (!user) {
-      return NextResponse.json({ message: 'User not found' }, { status: 404 })
+      console.log('User not found, returning fallback data')
+      // Return fallback data for new users
+      return NextResponse.json({
+        user: {
+          name: session.user.name || 'User',
+          honorPoints: 0,
+          level: 1,
+          streak: 0,
+          longestStreak: 0
+        },
+        overview: {
+          totalHabits: 0,
+          completedToday: 0,
+          currentStreak: 0,
+          totalPoints: 0
+        },
+        weeklyActivity: [],
+        categoryStats: [],
+        recentCompletions: [],
+        motivationalQuote: 'Welcome to Limit Breakers! Start your journey today.'
+      })
     }
 
     // Get user's tasks
