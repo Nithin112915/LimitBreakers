@@ -1,10 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Conditionally set output based on build target
-  ...(process.env.BUILD_TARGET === 'mobile' ? {} : { output: 'export' }),
-  distDir: 'out',
   images: {
-    domains: ['localhost', 'limit-breakers.com', 'limitbreakers.netlify.app'],
+    domains: ['localhost', 'limit-breakers.com'],
     unoptimized: true,
   },
   env: {
@@ -20,26 +17,11 @@ const nextConfig = {
   },
   swcMinify: true,
   trailingSlash: true,
-  assetPrefix: process.env.NODE_ENV === 'production' ? 'https://limitbreakers.netlify.app' : '',
+  // Disable static export to allow for API routes and server-side features
+  output: undefined,
   experimental: {
     missingSuspenseWithCSRBailout: false,
     serverComponentsExternalPackages: ['mongoose'],
-  },
-  // Mobile app optimizations
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
-  // PWA and mobile enhancements
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      }
-    }
-    return config
   },
 }
 

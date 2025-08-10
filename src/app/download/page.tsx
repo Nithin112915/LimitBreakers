@@ -21,35 +21,20 @@ export default function DownloadPage() {
     try {
       setDownloadStatus('Preparing download...')
       
-      // Direct download approach
+      // Use direct static file link instead of API route
       const apkUrl = '/downloads/limitbreakers-v2.0.0-premium.apk'
       
-      setDownloadStatus('Fetching APK file...')
+      setDownloadStatus('Starting download...')
       
-      // First try to fetch the file to ensure it exists
-      const response = await fetch(apkUrl)
-      if (!response.ok) {
-        throw new Error(`APK file not found (${response.status})`)
-      }
-      
-      setDownloadStatus('Creating download...')
-      
-      // Create blob from response
-      const blob = await response.blob()
-      
-      // Create download link
-      const url = window.URL.createObjectURL(blob)
+      // Create direct download link
       const link = document.createElement('a')
-      link.href = url
+      link.href = apkUrl
       link.download = 'LimitBreakers-Premium-v2.0.0.apk'
       link.style.display = 'none'
       
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      
-      // Clean up
-      window.URL.revokeObjectURL(url)
       
       setDownloadStatus('Download started successfully! 🎉')
       
@@ -59,13 +44,7 @@ export default function DownloadPage() {
     } catch (error) {
       console.error('Download error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      setDownloadStatus(`Error: ${errorMessage}. Trying direct link...`)
-      
-      // Fallback to direct link
-      setTimeout(() => {
-        window.open('/downloads/limitbreakers-v2.0.0-premium.apk', '_blank')
-        setDownloadStatus('Opened direct download link')
-      }, 1000)
+      setDownloadStatus(`Error: ${errorMessage}`)
       
       // Clear status after 5 seconds
       setTimeout(() => setDownloadStatus(''), 5000)
@@ -151,7 +130,7 @@ export default function DownloadPage() {
               )}
               
               <a 
-                href="/downloads/limitbreakers-v2.0.0-premium.apk"
+                href="/api/downloads/limitbreakers-v2.0.0-premium.apk"
                 download="LimitBreakers-Premium-v2.0.0.apk"
                 className="btn-secondary w-full py-3 text-base font-medium flex items-center justify-center"
               >
