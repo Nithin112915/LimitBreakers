@@ -1,10 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowDownTrayIcon, DevicePhoneMobileIcon, ComputerDesktopIcon, SparklesIcon, CheckIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 
 export default function DownloadPage() {
+  const [downloadStatus, setDownloadStatus] = useState('')
+  
   const features = [
     'Offline Task Management',
     'Push Notifications for Reminders',
@@ -14,17 +17,59 @@ export default function DownloadPage() {
     'Mobile-optimized Honor System'
   ]
 
-  const downloadAPK = () => {
-    // This will be the actual APK download link
-    const apkUrl = '/downloads/limitbreakers-v2.0.0-premium.apk'
-    
-    // Create a temporary link element to trigger download
-    const link = document.createElement('a')
-    link.href = apkUrl
-    link.download = 'LimitBreakers-Premium-v2.0.0.apk'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+  const downloadAPK = async () => {
+    try {
+      setDownloadStatus('Preparing download...')
+      
+      // Direct download approach
+      const apkUrl = '/downloads/limitbreakers-v2.0.0-premium.apk'
+      
+      setDownloadStatus('Fetching APK file...')
+      
+      // First try to fetch the file to ensure it exists
+      const response = await fetch(apkUrl)
+      if (!response.ok) {
+        throw new Error(`APK file not found (${response.status})`)
+      }
+      
+      setDownloadStatus('Creating download...')
+      
+      // Create blob from response
+      const blob = await response.blob()
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'LimitBreakers-Premium-v2.0.0.apk'
+      link.style.display = 'none'
+      
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Clean up
+      window.URL.revokeObjectURL(url)
+      
+      setDownloadStatus('Download started successfully! 🎉')
+      
+      // Clear status after 3 seconds
+      setTimeout(() => setDownloadStatus(''), 3000)
+      
+    } catch (error) {
+      console.error('Download error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      setDownloadStatus(`Error: ${errorMessage}. Trying direct link...`)
+      
+      // Fallback to direct link
+      setTimeout(() => {
+        window.open('/downloads/limitbreakers-v2.0.0-premium.apk', '_blank')
+        setDownloadStatus('Opened direct download link')
+      }, 1000)
+      
+      // Clear status after 5 seconds
+      setTimeout(() => setDownloadStatus(''), 5000)
+    }
   }
 
   return (
@@ -94,6 +139,25 @@ export default function DownloadPage() {
                 <ArrowDownTrayIcon className="w-6 h-6 mr-2" />
                 Download APK v2.0.0
               </motion.button>
+              
+              {downloadStatus && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                >
+                  <p className="text-blue-700 text-sm font-medium">{downloadStatus}</p>
+                </motion.div>
+              )}
+              
+              <a 
+                href="/downloads/limitbreakers-v2.0.0-premium.apk"
+                download="LimitBreakers-Premium-v2.0.0.apk"
+                className="btn-secondary w-full py-3 text-base font-medium flex items-center justify-center"
+              >
+                <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
+                Direct Download Link
+              </a>
               
               <div className="text-center">
                 <p className="text-sm text-gray-500 mb-2">File size: ~15MB | Version: 2.0.0 Premium</p>
