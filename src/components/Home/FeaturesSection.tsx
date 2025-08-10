@@ -73,15 +73,15 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <div id="features" className="py-12 bg-white">
+    <div id="features" className="py-12 premium-gradient">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="lg:text-center">
+        <div className="lg:text-center glass-morphism p-8 rounded-xl card-3d mb-10">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-base text-primary-600 font-semibold tracking-wide uppercase"
+            className="text-base gold-accent font-semibold tracking-wide uppercase neon-glow"
           >
             Features
           </motion.h2>
@@ -90,7 +90,7 @@ export function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl"
+            className="mt-2 text-3xl leading-8 font-extrabold tracking-tight premium-text sm:text-4xl neon-glow"
           >
             Everything you need to build lasting habits
           </motion.p>
@@ -99,7 +99,7 @@ export function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto"
+            className="mt-4 max-w-2xl text-xl premium-text-muted lg:mx-auto"
           >
             Combining AI-driven insights, social accountability, and gamification 
             to create a comprehensive personal growth platform.
@@ -117,17 +117,17 @@ export function FeaturesSection() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 className="relative"
               >
-                <div className="card hover:shadow-md transition-shadow duration-300">
+                <div className="glass-morphism hover:bg-white/10 transition-all duration-300 card-3d p-6 rounded-xl">
                   <div>
-                    <span className={`rounded-lg p-3 ${feature.bgColor} flex items-center justify-center w-12 h-12`}>
-                      <feature.icon className={`h-6 w-6 ${feature.color}`} aria-hidden="true" />
+                    <span className="rounded-lg p-3 bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center w-12 h-12 floating-animation">
+                      <feature.icon className="h-6 w-6 text-white" aria-hidden="true" />
                     </span>
                   </div>
                   <div className="mt-4">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium premium-text neon-glow">
                       {feature.name}
                     </h3>
-                    <p className="mt-2 text-base text-gray-500">
+                    <p className="mt-2 text-base premium-text-muted">
                       {feature.description}
                     </p>
                   </div>

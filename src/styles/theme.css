@@ -15,25 +15,25 @@
   --color-gray-800: 31 41 55;
   --color-gray-900: 17 24 39;
 
-  /* Default theme colors */
-  --color-primary: 79 70 229;
-  --color-primary-dark: 67 56 202;
-  --color-secondary: 99 102 241;
-  --color-accent: 168 85 247;
+  /* Premium theme colors */
+  --color-primary: 234 179 8; /* Gold primary */
+  --color-primary-dark: 202 138 4; /* Darker gold */
+  --color-secondary: 168 85 247; /* Purple secondary */
+  --color-accent: 59 130 246; /* Blue accent */
   
-  /* Background colors */
-  --color-background: var(--color-white);
-  --color-surface: var(--color-gray-50);
-  --color-surface-elevated: var(--color-white);
+  /* Premium background colors */
+  --color-background: 15 23 42; /* Slate-900 */
+  --color-surface: 30 41 59; /* Slate-800 */
+  --color-surface-elevated: 51 65 85; /* Slate-700 */
   
-  /* Text colors */
-  --color-text-primary: var(--color-gray-900);
-  --color-text-secondary: var(--color-gray-600);
-  --color-text-muted: var(--color-gray-500);
+  /* Premium text colors */
+  --color-text-primary: 248 250 252; /* Slate-50 */
+  --color-text-secondary: 203 213 225; /* Slate-300 */
+  --color-text-muted: 148 163 184; /* Slate-400 */
   
-  /* Border colors */
-  --color-border: var(--color-gray-200);
-  --color-border-light: var(--color-gray-100);
+  /* Premium border colors */
+  --color-border: 71 85 105; /* Slate-600 */
+  --color-border-light: 100 116 139; /* Slate-500 */
   
   /* Theme properties */
   --base-font-size: 16px;

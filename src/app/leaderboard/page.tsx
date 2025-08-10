@@ -236,13 +236,13 @@ export default function LeaderboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 p-4">
+      <div className="min-h-screen premium-gradient p-4">
         <div className="max-w-4xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-64 mb-6"></div>
+          <div className="glass-morphism p-8 rounded-xl card-3d">
+            <div className="h-8 bg-white/20 rounded w-64 mb-6 pulse-animation"></div>
             <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-20 bg-gray-200 rounded-xl"></div>
+                <div key={i} className="h-20 bg-white/20 rounded-xl pulse-animation"></div>
               ))}
             </div>
           </div>
@@ -252,16 +252,16 @@ export default function LeaderboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 p-4">
+    <div className="min-h-screen premium-gradient p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 glass-morphism p-6 rounded-xl card-3d">
           <div className="flex items-center gap-3 mb-4">
-            <Trophy className="w-8 h-8 text-yellow-500" />
-            <h1 className="text-3xl font-bold text-gray-800">Leaderboard</h1>
+            <Trophy className="w-8 h-8 gold-accent floating-animation" />
+            <h1 className="text-4xl font-bold premium-text neon-glow">Leaderboard</h1>
           </div>
-          <p className="text-gray-600">
-            See how you stack up against other habit builders
+          <p className="premium-text-muted">
+            Compete with fellow habit builders and track your progress
           </p>
         </div>
 

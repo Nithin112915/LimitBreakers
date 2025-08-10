@@ -11,15 +11,15 @@ const stats = [
 
 export function StatsSection() {
   return (
-    <div className="bg-primary-800">
+    <div className="premium-gradient py-16">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:py-16 sm:px-6 lg:px-8 lg:py-20">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-4xl mx-auto text-center glass-morphism p-8 rounded-xl card-3d mb-10">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-3xl font-extrabold text-white sm:text-4xl"
+            className="text-3xl font-extrabold premium-text sm:text-4xl neon-glow"
           >
             Trusted by thousands of growth-focused individuals
           </motion.h2>
@@ -28,7 +28,7 @@ export function StatsSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="mt-3 text-xl text-primary-200 sm:mt-4"
+            className="mt-3 text-xl premium-text-muted sm:mt-4"
           >
             Join a community of achievers who are transforming their lives through consistent habits.
           </motion.p>
@@ -42,12 +42,13 @@ export function StatsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="flex flex-col mt-10 sm:mt-0"
+              className="flex flex-col mt-10 sm:mt-0 glass-morphism p-6 rounded-xl card-3d floating-animation"
+              style={{animationDelay: `${index * 0.1}s`}}
             >
-              <dt className="order-2 mt-2 text-lg leading-6 font-medium text-primary-200">
+              <dt className="order-2 mt-2 text-lg leading-6 font-medium premium-text-muted">
                 {stat.name}
               </dt>
-              <dd className="order-1 text-5xl font-extrabold text-white">
+              <dd className="order-1 text-5xl font-extrabold gold-accent neon-glow pulse-animation">
                 {stat.value}
               </dd>
             </motion.div>

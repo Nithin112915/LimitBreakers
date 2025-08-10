@@ -10,10 +10,10 @@ export default function HonorScorePage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading honor score...</p>
+      <div className="min-h-screen premium-gradient flex items-center justify-center">
+        <div className="text-center glass-morphism p-8 rounded-xl card-3d">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-accent mx-auto mb-4 floating-animation"></div>
+          <p className="premium-text neon-glow">Loading honor score...</p>
         </div>
       </div>
     )
@@ -21,13 +21,13 @@ export default function HonorScorePage() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <TrophyIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+      <div className="min-h-screen premium-gradient flex items-center justify-center">
+        <div className="text-center glass-morphism p-8 rounded-xl card-3d">
+          <TrophyIcon className="h-16 w-16 gold-accent mx-auto mb-4 floating-animation" />
+          <h2 className="text-2xl font-semibold premium-text mb-2 neon-glow">
             Sign in to view your Honor Score
           </h2>
-          <p className="text-gray-600">
+          <p className="premium-text-muted">
             Track your progress and see how you're performing with our comprehensive scoring system.
           </p>
         </div>
@@ -36,22 +36,20 @@ export default function HonorScorePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen premium-gradient">
       <div className="max-w-7xl mx-auto">
         {/* Page Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white shadow-sm border-b border-gray-200 px-6 py-4"
+          className="glass-morphism border-b border-white/20 px-6 py-4 card-3d"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <TrophyIcon className="h-8 w-8 text-primary-600 mr-3" />
+              <TrophyIcon className="h-8 w-8 gold-accent mr-3 floating-animation" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Honor Score System</h1>
-                <p className="text-gray-600">
-                  Comprehensive tracking of your habit consistency and achievements
-                </p>
+                <h1 className="text-2xl font-bold premium-text neon-glow">Honor Score</h1>
+                <p className="premium-text-muted">Track your achievements and growth</p>
               </div>
             </div>
             
@@ -59,9 +57,9 @@ export default function HonorScorePage() {
             <div className="flex items-center space-x-4">
               <a
                 href="/admin/honor-score"
-                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                className="inline-flex items-center px-3 py-2 glass-morphism border border-white/20 text-sm leading-4 font-medium rounded-md premium-text hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-accent button-3d ripple-effect"
               >
-                <TrophyIcon className="h-4 w-4 mr-2" />
+                <TrophyIcon className="h-4 w-4 mr-2 gold-accent" />
                 Admin Panel
               </a>
             </div>

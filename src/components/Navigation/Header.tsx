@@ -179,25 +179,25 @@ const Header = () => {
 
   if (status === 'unauthenticated') {
     return (
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-slate-900 border-b border-slate-700">
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="h-8 w-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <SparklesIcon className="h-5 w-5 text-white" />
+              <div className="h-8 w-8 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center">
+                <SparklesIcon className="h-5 w-5 text-black" />
               </div>
-              <span className="text-xl font-bold text-gray-900">Limit Breakers</span>
+              <span className="text-xl font-bold text-slate-100">Limit Breakers</span>
             </Link>
             <div className="flex items-center space-x-4">
               <Link
                 href="/auth/signin"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
+                className="text-slate-300 hover:text-slate-100 px-3 py-2 text-sm font-medium"
               >
                 Sign In
               </Link>
               <Link
                 href="/auth/signup"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               >
                 Get Started
               </Link>
@@ -209,27 +209,28 @@ const Header = () => {
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header className="premium-gradient border-b border-white/10 sticky top-0 z-50 glass-morphism">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand */}
           <div className="flex items-center space-x-4">
-            <Link href="/dashboard" className="flex items-center space-x-2">
-              <div className="h-8 w-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <SparklesIcon className="h-5 w-5 text-white" />
+            <Link href="/dashboard" className="flex items-center space-x-2 group">
+              <div className="card-3d h-8 w-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
+                <SparklesIcon className="h-5 w-5 text-black" />
               </div>
-              <span className="text-xl font-bold text-gray-900">Limit Breakers</span>
+              <span className="text-xl font-bold premium-text neon-glow">Limit Breakers</span>
             </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-1">
-              {navigation.map((item) => {
+              {navigation.map((item, index) => {
                 const Icon = item.icon
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="button-3d ripple-effect flex items-center space-x-1 px-3 py-2 text-sm font-medium premium-text hover:gold-accent rounded-lg transition-all duration-300"
+                    style={{animationDelay: `${index * 0.1}s`}}
                   >
                     <Icon className="h-4 w-4" />
                     <span>{item.name}</span>
@@ -242,12 +243,12 @@ const Header = () => {
           {/* Right Side */}
           <div className="flex items-center space-x-4">
             {/* Honor Points */}
-            <div className="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg px-3 py-1 border border-yellow-200">
-              <TrophyIcon className="h-4 w-4 text-yellow-600" />
-              <span className="text-sm font-bold text-yellow-700">
+            <div className="hidden sm:flex items-center space-x-2 glass-morphism rounded-lg px-3 py-1 border border-yellow-400/30 floating-animation">
+              <TrophyIcon className="h-4 w-4 text-yellow-400 pulse-animation" />
+              <span className="text-sm font-bold gold-accent">
                 {userHonorPoints.toLocaleString()} HP
               </span>
-              <span className="text-xs text-yellow-600">Level {userLevel}</span>
+              <span className="text-xs premium-text-muted">Level {userLevel}</span>
             </div>
 
             {/* Notifications */}
@@ -272,15 +273,15 @@ const Header = () => {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
                     transition={{ duration: 0.1 }}
-                    className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                    className="absolute right-0 mt-2 w-80 glass-morphism rounded-lg border border-white/20 z-50 card-3d"
                   >
-                    <div className="p-4 border-b border-gray-200">
+                    <div className="p-4 border-b border-white/10">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+                        <h3 className="text-lg font-semibold premium-text neon-glow">Notifications</h3>
                         {unreadCount > 0 && (
                           <button
                             onClick={markAllAsRead}
-                            className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+                            className="text-sm gold-accent hover:text-yellow-300 font-medium button-3d px-2 py-1 rounded transition-all"
                           >
                             Mark all read
                           </button>
@@ -290,38 +291,38 @@ const Header = () => {
 
                     <div className="max-h-96 overflow-y-auto">
                       {notifications.length === 0 ? (
-                        <div className="p-4 text-center text-gray-500">
-                          <BellIcon className="h-8 w-8 mx-auto text-gray-300 mb-2" />
+                        <div className="p-4 text-center premium-text-muted">
+                          <BellIcon className="h-8 w-8 mx-auto premium-text-muted mb-2 floating-animation" />
                           <p>No notifications yet</p>
                         </div>
                       ) : (
-                        notifications.map((notification) => (
+                        notifications.map((notification, index) => (
                           <div
                             key={notification.id}
-                            className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
-                              !notification.read ? 'bg-blue-50' : ''
+                            className={`p-4 border-b border-white/10 hover:bg-white/5 cursor-pointer card-3d transition-all ${
+                              !notification.read ? 'bg-gradient-to-r from-purple-500/10 to-pink-500/10' : ''
                             }`}
                             onClick={() => !notification.read && markNotificationAsRead(notification.id)}
                           >
                             <div className="flex items-start space-x-3">
-                              <span className="text-lg flex-shrink-0 mt-0.5">
+                              <span className="text-lg flex-shrink-0 mt-0.5 gold-accent floating-animation">
                                 {getNotificationIcon(notification.type)}
                               </span>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
                                   <p className={`text-sm font-medium ${
-                                    !notification.read ? 'text-gray-900' : 'text-gray-600'
+                                    !notification.read ? 'premium-text neon-glow' : 'premium-text-muted'
                                   }`}>
                                     {notification.title}
                                   </p>
                                   {!notification.read && (
-                                    <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+                                    <div className="h-2 w-2 bg-gold-accent rounded-full pulse-animation neon-glow"></div>
                                   )}
                                 </div>
-                                <p className="text-sm text-gray-500 mt-1">
+                                <p className="text-sm premium-text-muted mt-1">
                                   {notification.message}
                                 </p>
-                                <p className="text-xs text-gray-400 mt-1">
+                                <p className="text-xs premium-text-muted mt-1">
                                   {formatTimeAgo(notification.timestamp)}
                                 </p>
                               </div>
@@ -332,10 +333,10 @@ const Header = () => {
                     </div>
 
                     {notifications.length > 0 && (
-                      <div className="p-3 border-t border-gray-200">
+                      <div className="p-3 border-t border-white/10">
                         <Link
                           href="/notifications"
-                          className="block text-center text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+                          className="block text-center text-sm gold-accent hover:text-yellow-300 font-medium button-3d px-4 py-2 rounded transition-all neon-glow"
                           onClick={() => setNotificationsOpen(false)}
                         >
                           View all notifications
@@ -380,31 +381,31 @@ const Header = () => {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
                     transition={{ duration: 0.1 }}
-                    className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                    className="absolute right-0 mt-2 w-48 glass-morphism rounded-lg border border-white/20 z-50 card-3d"
                   >
                     <div className="py-1">
                       <Link
                         href="/profile"
-                        className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="flex items-center space-x-2 px-4 py-2 text-sm premium-text hover:bg-white/10 transition-all button-3d ripple-effect"
                         onClick={() => setProfileMenuOpen(false)}
                       >
-                        <UserIcon className="h-4 w-4" />
+                        <UserIcon className="h-4 w-4 gold-accent" />
                         <span>Profile</span>
                       </Link>
                       <Link
                         href="/settings"
-                        className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="flex items-center space-x-2 px-4 py-2 text-sm premium-text hover:bg-white/10 transition-all button-3d ripple-effect"
                         onClick={() => setProfileMenuOpen(false)}
                       >
-                        <Cog6ToothIcon className="h-4 w-4" />
+                        <Cog6ToothIcon className="h-4 w-4 gold-accent" />
                         <span>Settings</span>
                       </Link>
-                      <div className="border-t border-gray-100">
+                      <div className="border-t border-white/20">
                         <button
                           onClick={handleSignOut}
-                          className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          className="flex items-center space-x-2 w-full px-4 py-2 text-sm premium-text hover:bg-red-500/20 transition-all button-3d ripple-effect"
                         >
-                          <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                          <ArrowRightOnRectangleIcon className="h-4 w-4 text-red-400" />
                           <span>Sign Out</span>
                         </button>
                       </div>
@@ -424,7 +425,7 @@ const Header = () => {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
-              className="lg:hidden border-t border-gray-200"
+              className="lg:hidden border-t border-white/20 glass-morphism"
             >
               <div className="py-2 space-y-1">
                 {navigation.map((item) => {
@@ -433,10 +434,10 @@ const Header = () => {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="flex items-center space-x-2 px-3 py-2 text-base font-medium premium-text hover:bg-white/10 rounded-lg transition-all button-3d ripple-effect"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className="h-5 w-5 gold-accent" />
                       <span>{item.name}</span>
                     </Link>
                   )

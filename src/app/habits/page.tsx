@@ -276,17 +276,17 @@ export default function HabitsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen premium-gradient">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 glass-morphism p-6 rounded-xl card-3d">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Habits</h1>
-            <p className="text-gray-600">Track and manage your daily habits</p>
+            <h1 className="text-3xl font-bold premium-text mb-2 neon-glow">My Habits</h1>
+            <p className="premium-text-muted">Track and manage your daily habits</p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="mt-4 sm:mt-0 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2 w-fit"
+            className="mt-4 sm:mt-0 button-3d px-6 py-3 rounded-lg font-medium transition-all flex items-center space-x-2 w-fit bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 ripple-effect neon-glow"
           >
             <PlusIcon className="h-5 w-5" />
             <span>Add New Habit</span>
@@ -294,17 +294,17 @@ export default function HabitsPage() {
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-lg border border-white/30 p-6 mb-8">
+        <div className="glass-morphism rounded-xl border border-white/30 p-6 mb-8 card-3d">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
             {/* Search */}
             <div className="relative flex-1 max-w-md">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 gold-accent" />
               <input
                 type="text"
                 placeholder="Search habits..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 glass-morphism border border-white/20 rounded-lg focus:ring-2 focus:ring-gold-accent focus:border-transparent premium-text button-3d"
               />
             </div>
 

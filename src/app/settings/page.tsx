@@ -390,7 +390,7 @@ export default function SettingsPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="glass-morphism rounded-xl border border-white/20 overflow-hidden card-3d">
           <div className="flex min-h-[600px]">
             {/* Sidebar */}
             <div className="w-72 bg-gray-50 border-r border-gray-200">

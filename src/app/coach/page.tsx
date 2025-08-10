@@ -392,17 +392,17 @@ export default function CoachPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
+    <div className="min-h-screen premium-gradient p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 glass-morphism p-6 rounded-xl card-3d">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-purple-600 rounded-lg">
+            <div className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg floating-animation">
               <Brain className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-800">AI Companion & Coach</h1>
+            <h1 className="text-3xl font-bold premium-text neon-glow">AI Companion & Coach</h1>
           </div>
-          <p className="text-gray-600">
+          <p className="premium-text-muted">
             Your intelligent AI companion with web access for current information, casual conversations, habit coaching, and personal growth
           </p>
         </div>
@@ -410,11 +410,11 @@ export default function CoachPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* AI Recommendations */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="glass-morphism rounded-xl p-6 mb-6 card-3d">
               <div className="flex items-center gap-2 mb-4">
-                <Lightbulb className="w-5 h-5 text-yellow-500" />
-                <h3 className="font-semibold text-gray-800">Daily Inspiration & Ideas</h3>
-                <span className="text-sm bg-purple-100 text-purple-700 px-2 py-1 rounded-full">✨ For You</span>
+                <Lightbulb className="w-5 h-5 gold-accent floating-animation" />
+                <h3 className="font-semibold premium-text">Daily Inspiration & Ideas</h3>
+                <span className="text-sm bg-gradient-to-r from-purple-600 to-pink-600 text-white px-2 py-1 rounded-full neon-glow">✨ For You</span>
               </div>
               
               <div className="space-y-4">
@@ -490,7 +490,7 @@ export default function CoachPage() {
 
           {/* Chat Interface */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm h-[600px] flex flex-col">
+            <div className="glass-morphism rounded-xl h-[600px] flex flex-col card-3d">
               {/* Chat Header */}
               <div className="border-b border-gray-200 p-4">
                 <div className="flex items-center gap-3">

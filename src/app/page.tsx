@@ -41,10 +41,10 @@ export default function HomePage() {
   // Show loading only briefly, then show landing page
   if (status === 'loading' && !showLanding) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading Limit Breakers...</p>
+      <div className="min-h-screen premium-gradient flex items-center justify-center">
+        <div className="text-center glass-morphism p-8 rounded-xl card-3d">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-gold-accent border-t-transparent mx-auto mb-4 floating-animation"></div>
+          <p className="premium-text text-lg neon-glow">Loading Limit Breakers...</p>
         </div>
       </div>
     )
@@ -53,10 +53,10 @@ export default function HomePage() {
   // If user is authenticated, show a quick redirect message
   if (status === 'authenticated') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent mx-auto mb-4"></div>
-          <p className="text-white text-lg">Redirecting to dashboard...</p>
+      <div className="min-h-screen premium-gradient flex items-center justify-center">
+        <div className="text-center glass-morphism p-8 rounded-xl card-3d">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-gold-accent border-t-transparent mx-auto mb-4 floating-animation"></div>
+          <p className="premium-text text-lg neon-glow">Redirecting to dashboard...</p>
         </div>
       </div>
     )
@@ -65,21 +65,21 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Testing Dashboard Link */}
-      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+      <div className="glass-morphism border-l-4 border-gold-accent p-4 mb-4 card-3d">
         <div className="flex">
           <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+            <svg className="h-5 w-5 gold-accent floating-animation" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
           </div>
           <div className="ml-3">
-            <p className="text-sm text-blue-700">
-              <strong>For Testing:</strong> You can{' '}
-              <a href="/dashboard" className="font-medium underline text-blue-800 hover:text-blue-600">
+            <p className="text-sm premium-text">
+              <strong className="neon-glow">For Testing:</strong> You can{' '}
+              <a href="/dashboard" className="font-medium underline gold-accent hover:text-yellow-300 button-3d px-1 rounded transition-all">
                 go directly to the dashboard
               </a>
               {' '}or{' '}
-              <a href="/auth/signin" className="font-medium underline text-blue-800 hover:text-blue-600">
+              <a href="/auth/signin" className="font-medium underline gold-accent hover:text-yellow-300 button-3d px-1 rounded transition-all">
                 sign in here
               </a>
               {' '}with email: john@example.com, password: password123
@@ -93,13 +93,13 @@ export default function HomePage() {
       <FeaturesSection />
       
       {/* Demo Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 premium-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-12 glass-morphism p-8 rounded-xl card-3d">
+            <h2 className="text-3xl font-bold premium-text mb-4 neon-glow">
               See Limit Breakers in Action
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl premium-text-muted max-w-3xl mx-auto">
               Watch how our platform transforms habit building with AI-powered insights, 
               social accountability, and gamified personal growth.
             </p>

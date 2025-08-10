@@ -208,14 +208,14 @@ export default function AnalyticsPage() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 pt-20">
+      <div className="min-h-screen premium-gradient pt-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Authentication Required</h1>
-            <p className="text-gray-600 mb-8">Please sign in to view your analytics.</p>
+          <div className="text-center glass-morphism p-8 rounded-xl card-3d">
+            <h1 className="text-3xl font-bold premium-text mb-4 neon-glow">Authentication Required</h1>
+            <p className="premium-text-muted mb-8">Please sign in to view your analytics.</p>
             <Link
               href="/auth/signin"
-              className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors"
+              className="button-3d px-6 py-3 rounded-lg transition-all bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 ripple-effect neon-glow"
             >
               Sign In
             </Link>
@@ -230,12 +230,12 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen premium-gradient">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Analytics Dashboard</h1>
-          <p className="text-gray-600">Track your progress and insights</p>
+        <div className="mb-8 glass-morphism p-6 rounded-xl card-3d">
+          <h1 className="text-3xl font-bold premium-text mb-2 neon-glow">Analytics Dashboard</h1>
+          <p className="premium-text-muted">Track your progress and insights</p>
         </div>
 
         {/* Overview Stats */}
@@ -244,17 +244,17 @@ export default function AnalyticsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white"
+            className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-6 text-white card-3d floating-animation neon-glow"
           >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-blue-100 text-sm font-medium">Total Completions</p>
-                <p className="text-3xl font-bold">{analytics.overview.totalCompletions}</p>
+                <p className="text-3xl font-bold pulse-animation">{analytics.overview.totalCompletions}</p>
                 <p className="text-blue-200 text-sm mt-1">
                   {analytics.overview.totalHabits} active habits
                 </p>
               </div>
-              <CheckCircleIcon className="h-12 w-12 text-blue-100" />
+              <CheckCircleIcon className="h-12 w-12 text-blue-100 floating-animation" />
             </div>
           </motion.div>
 
@@ -262,17 +262,17 @@ export default function AnalyticsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-6 text-white"
+            className="bg-gradient-to-r from-green-600 to-emerald-700 rounded-xl p-6 text-white card-3d floating-animation neon-glow"
           >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-green-100 text-sm font-medium">Success Rate</p>
-                <p className="text-3xl font-bold">{analytics.overview.averageCompletionRate}%</p>
+                <p className="text-3xl font-bold pulse-animation">{analytics.overview.averageCompletionRate}%</p>
                 <p className="text-green-200 text-sm mt-1">
                   Average across all habits
                 </p>
               </div>
-              <ArrowTrendingUpIcon className="h-12 w-12 text-green-100" />
+              <ArrowTrendingUpIcon className="h-12 w-12 text-green-100 floating-animation" />
             </div>
           </motion.div>
 
@@ -280,54 +280,54 @@ export default function AnalyticsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-gradient-to-r from-orange-500 to-red-600 rounded-xl p-6 text-white"
+            className="bg-gradient-to-r from-orange-600 to-red-700 rounded-xl p-6 text-white card-3d floating-animation neon-glow"
           >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-orange-100 text-sm font-medium">Longest Streak</p>
-                <p className="text-3xl font-bold">{analytics.overview.longestStreak}</p>
+                <p className="text-3xl font-bold pulse-animation">{analytics.overview.longestStreak}</p>
                 <p className="text-orange-200 text-sm mt-1">
                   Current: {analytics.overview.currentStreak} days
                 </p>
               </div>
-              <FireIcon className="h-12 w-12 text-orange-100" />
+              <FireIcon className="h-12 w-12 text-orange-100 floating-animation" />
             </div>
           </motion.div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Weekly Activity Chart */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-lg border border-white/30 p-6">
+          <div className="glass-morphism rounded-xl border border-white/20 p-6 card-3d">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Weekly Activity</h2>
-              <CalendarIcon className="h-6 w-6 text-indigo-600" />
+              <h2 className="text-xl font-semibold premium-text neon-glow">Weekly Activity</h2>
+              <CalendarIcon className="h-6 w-6 gold-accent floating-animation" />
             </div>
             
             <div className="space-y-4">
               {analytics.weeklyData.map((day, index) => (
                 <div key={day.date} className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700 w-12">{day.day}</span>
+                  <span className="text-sm font-medium premium-text w-12">{day.day}</span>
                   <div className="flex-1 mx-4">
-                    <div className="bg-gray-200 rounded-full h-3">
+                    <div className="bg-white/20 rounded-full h-3">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.min((day.completions / 10) * 100, 100)}%` }}
                         transition={{ delay: index * 0.1 }}
-                        className="bg-gradient-to-r from-indigo-500 to-purple-600 h-3 rounded-full"
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 h-3 rounded-full progress-bar-3d"
                       />
                     </div>
                   </div>
-                  <span className="text-sm font-bold text-gray-900 w-8">{day.completions}</span>
+                  <span className="text-sm font-bold premium-text w-8">{day.completions}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Category Breakdown */}
-          <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-lg border border-white/30 p-6">
+          <div className="glass-morphism rounded-xl border border-white/20 p-6 card-3d">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Category Breakdown</h2>
-              <ChartPieIcon className="h-6 w-6 text-purple-600" />
+              <h2 className="text-xl font-semibold premium-text neon-glow">Category Breakdown</h2>
+              <ChartPieIcon className="h-6 w-6 gold-accent floating-animation" />
             </div>
             
             <div className="space-y-4">
@@ -355,10 +355,10 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Monthly Trends */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-lg border border-white/30 p-6 mb-8">
+        <div className="glass-morphism rounded-xl border border-white/20 p-6 mb-8 card-3d">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Monthly Trends</h2>
-            <ChartBarIcon className="h-6 w-6 text-green-600" />
+            <h2 className="text-xl font-semibold premium-text neon-glow">Monthly Trends</h2>
+            <ChartBarIcon className="h-6 w-6 gold-accent floating-animation" />
           </div>
           
           <div className="flex items-end space-x-4 h-48">
@@ -368,65 +368,65 @@ export default function AnalyticsPage() {
                   initial={{ height: 0 }}
                   animate={{ height: `${(month.completions / 70) * 100}%` }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-gradient-to-t from-green-500 to-emerald-400 rounded-t-lg w-full min-h-[20px] mb-2"
+                  className="bg-gradient-to-t from-green-600 to-emerald-500 rounded-t-lg w-full min-h-[20px] mb-2 progress-bar-3d"
                 />
-                <span className="text-xs font-medium text-gray-700">{month.month}</span>
-                <span className="text-xs text-gray-500">{month.completions}</span>
+                <span className="text-xs font-medium premium-text">{month.month}</span>
+                <span className="text-xs premium-text-muted">{month.completions}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Habit Performance Table */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-lg border border-white/30 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Habit Performance</h2>
+        <div className="glass-morphism rounded-xl border border-white/20 p-6 card-3d">
+          <h2 className="text-xl font-semibold premium-text mb-6 neon-glow">Habit Performance</h2>
           
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Habit</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700">Category</th>
-                  <th className="text-center py-3 px-4 font-medium text-gray-700">Completions</th>
-                  <th className="text-center py-3 px-4 font-medium text-gray-700">Success Rate</th>
-                  <th className="text-center py-3 px-4 font-medium text-gray-700">Current Streak</th>
-                  <th className="text-center py-3 px-4 font-medium text-gray-700">Honor Points</th>
+                <tr className="border-b border-white/20">
+                  <th className="text-left py-3 px-4 font-medium premium-text">Habit</th>
+                  <th className="text-left py-3 px-4 font-medium premium-text">Category</th>
+                  <th className="text-center py-3 px-4 font-medium premium-text">Completions</th>
+                  <th className="text-center py-3 px-4 font-medium premium-text">Success Rate</th>
+                  <th className="text-center py-3 px-4 font-medium premium-text">Current Streak</th>
+                  <th className="text-center py-3 px-4 font-medium premium-text">Honor Points</th>
                 </tr>
               </thead>
               <tbody>
                 {habits.slice(0, 5).map((habit) => (
-                  <tr key={habit._id} className="border-b border-gray-100 hover:bg-white/50">
+                  <tr key={habit._id} className="border-b border-white/20 hover:bg-white/10 transition-all button-3d">
                     <td className="py-3 px-4">
-                      <span className="font-medium text-gray-900">{habit.title}</span>
+                      <span className="font-medium premium-text">{habit.title}</span>
                     </td>
                     <td className="py-3 px-4">
                       <span 
-                        className="px-2 py-1 rounded-full text-xs font-medium text-white capitalize"
+                        className="px-2 py-1 rounded-full text-xs font-medium text-white capitalize button-3d"
                         style={{ backgroundColor: categoryColors[habit.category] || categoryColors.other }}
                       >
                         {habit.category}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className="font-bold text-indigo-600">
+                      <span className="font-bold gold-accent neon-glow">
                         {habit.analytics?.totalCompletions || 0}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className="font-bold text-green-600">
+                      <span className="font-bold text-green-400 neon-glow">
                         {Math.round(habit.analytics?.successRate || 0)}%
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">
                       <div className="flex items-center justify-center space-x-1">
-                        <FireIcon className="h-4 w-4 text-orange-500" />
-                        <span className="font-bold text-orange-600">
+                        <FireIcon className="h-4 w-4 text-orange-500 neon-glow" />
+                        <span className="font-bold text-orange-400 neon-glow">
                           {habit.analytics?.currentStreak || 0}
                         </span>
                       </div>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className="font-bold text-yellow-600">
+                      <span className="font-bold text-yellow-400 neon-glow">
                         {(habit.analytics?.totalCompletions || 0) * habit.honorPointsReward}
                       </span>
                     </td>
@@ -440,7 +440,7 @@ export default function AnalyticsPage() {
             <div className="mt-4 text-center">
               <Link
                 href="/habits"
-                className="text-indigo-600 hover:text-indigo-700 font-medium"
+                className="gold-accent hover:text-yellow-400 font-medium premium-text neon-glow button-3d"
               >
                 View all {habits.length} habits
               </Link>

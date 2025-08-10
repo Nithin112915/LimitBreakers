@@ -85,13 +85,13 @@ export default function AchievementsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
+      <div className="min-h-screen premium-gradient p-4">
         <div className="max-w-4xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-64 mb-6"></div>
+          <div className="glass-morphism p-8 rounded-xl card-3d">
+            <div className="h-8 bg-white/20 rounded w-64 mb-6 pulse-animation"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
+                <div key={i} className="h-32 bg-white/20 rounded-xl pulse-animation"></div>
               ))}
             </div>
           </div>
@@ -101,36 +101,36 @@ export default function AchievementsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
+    <div className="min-h-screen premium-gradient p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 glass-morphism p-6 rounded-xl card-3d">
           <div className="flex items-center gap-3 mb-4">
-            <Trophy className="w-8 h-8 text-yellow-500" />
-            <h1 className="text-3xl font-bold text-gray-800">Achievements</h1>
+            <Trophy className="w-8 h-8 gold-accent floating-animation" />
+            <h1 className="text-3xl font-bold premium-text neon-glow">Achievements</h1>
           </div>
           
           {/* Progress Overview */}
-          <div className="bg-white rounded-xl p-6 mb-6 shadow-sm">
+          <div className="glass-morphism rounded-xl p-6 mb-6 card-3d">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-800">Your Progress</h3>
-                <p className="text-gray-600">
+                <h3 className="text-lg font-semibold premium-text">Your Progress</h3>
+                <p className="premium-text-muted">
                   {earnedCount} of {totalCount} achievements unlocked
                 </p>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-purple-600">
+                <div className="text-2xl font-bold gold-accent neon-glow">
                   {Math.round(progressPercentage)}%
                 </div>
-                <div className="text-sm text-gray-500">Complete</div>
+                <div className="text-sm premium-text-muted">Complete</div>
               </div>
             </div>
             
             {/* Progress Bar */}
-            <div className="w-full bg-gray-200 rounded-full h-3">
+            <div className="w-full bg-white/20 rounded-full h-3">
               <motion.div
-                className="bg-gradient-to-r from-purple-500 to-blue-500 h-3 rounded-full"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 h-3 rounded-full progress-bar-3d"
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercentage}%` }}
                 transition={{ duration: 1, ease: "easeOut" }}

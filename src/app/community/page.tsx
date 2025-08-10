@@ -201,17 +201,18 @@ export default function CommunityPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen premium-gradient">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+          <div className="glass-morphism p-8 rounded-xl card-3d">
+            <div className="h-8 bg-white/20 rounded w-1/4 mb-4 pulse-animation"></div>
+            <div className="h-4 bg-white/20 rounded w-1/2 mb-8 pulse-animation"></div>
+            
             <div className="space-y-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white rounded-lg p-6">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-                  <div className="h-20 bg-gray-200 rounded"></div>
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="glass-morphism rounded-lg p-6 card-3d">
+                  <div className="h-4 bg-white/20 rounded w-3/4 mb-2 pulse-animation"></div>
+                  <div className="h-4 bg-white/20 rounded w-1/2 mb-4 pulse-animation"></div>
+                  <div className="h-20 bg-white/20 rounded pulse-animation"></div>
                 </div>
               ))}
             </div>
@@ -223,16 +224,16 @@ export default function CommunityPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen premium-gradient">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Community</h1>
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {error}
+          <div className="text-center glass-morphism p-8 rounded-xl card-3d">
+            <h1 className="text-2xl font-bold premium-text mb-4 neon-glow">Community</h1>
+            <div className="glass-morphism border-l-4 border-red-400 p-4 rounded mb-4">
+              <p className="premium-text">{error}</p>
             </div>
             <button 
               onClick={fetchPosts}
-              className="btn-primary"
+              className="button-3d px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition-all ripple-effect neon-glow"
             >
               Try Again
             </button>
@@ -243,26 +244,26 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen premium-gradient">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mb-8"
+          className="mb-8 glass-morphism p-6 rounded-xl card-3d"
         >
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Community</h1>
-              <p className="text-gray-600 mt-1">
+              <h1 className="text-3xl font-bold premium-text neon-glow">Community</h1>
+              <p className="premium-text-muted mt-1">
                 Connect, share, and get inspired by fellow achievers
               </p>
             </div>
             {session && (
               <button 
                 onClick={() => setShowCreatePost(true)}
-                className="btn-primary flex items-center"
+                className="button-3d px-4 py-2 rounded-lg flex items-center bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition-all ripple-effect neon-glow"
               >
                 <PlusIcon className="h-4 w-4 mr-2" />
                 Share Progress

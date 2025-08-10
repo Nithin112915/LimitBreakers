@@ -11,26 +11,26 @@ import {
 
 export function HeroSection() {
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-primary-50 to-secondary-50">
+    <div className="relative overflow-hidden premium-gradient">
       <div className="max-w-7xl mx-auto">
         <div className="relative z-10 pb-8 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
           <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
-            <div className="sm:text-center lg:text-left">
+            <div className="sm:text-center lg:text-left glass-morphism p-8 rounded-xl card-3d">
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl"
+                className="text-4xl tracking-tight font-extrabold premium-text sm:text-5xl md:text-6xl neon-glow"
               >
                 <span className="block xl:inline">Transform Your</span>{' '}
-                <span className="block text-primary-600 xl:inline">Growth Journey</span>
+                <span className="block gold-accent xl:inline floating-animation">Growth Journey</span>
               </motion.h1>
               
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0"
+                className="mt-3 text-base premium-text-muted sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0"
               >
                 Build lasting habits with AI-powered coaching, accountability through proof submission, 
                 and a professional community that celebrates your achievements. Earn Honor Points and 
@@ -43,10 +43,10 @@ export function HeroSection() {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start"
               >
-                <div className="rounded-md shadow">
+                <div className="rounded-md">
                   <Link
                     href="/auth/signup"
-                    className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 md:py-4 md:text-lg md:px-10 transition-colors"
+                    className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 md:py-4 md:text-lg md:px-10 transition-all button-3d ripple-effect neon-glow"
                   >
                     Start Your Journey
                   </Link>
@@ -54,7 +54,7 @@ export function HeroSection() {
                 <div className="mt-3 sm:mt-0 sm:ml-3">
                   <Link
                     href="#features"
-                    className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200 md:py-4 md:text-lg md:px-10 transition-colors"
+                    className="w-full flex items-center justify-center px-8 py-3 border border-white/20 text-base font-medium rounded-md premium-text glass-morphism hover:bg-white/10 md:py-4 md:text-lg md:px-10 transition-all button-3d"
                   >
                     Learn More
                   </Link>
