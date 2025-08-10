@@ -22,8 +22,8 @@ if (!global.mongoose) {
 }
 
 async function dbConnect() {
-  // Skip database connection during build time
-  if (process.env.NETLIFY_BUILD === 'true') {
+  // Only skip database connection during actual build process, not runtime
+  if (typeof window === 'undefined' && process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build') {
     console.log('⚠️ Skipping database connection during build')
     return null
   }

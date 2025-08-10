@@ -6,8 +6,8 @@ export async function GET() {
   try {
     console.log('🔄 Testing database connection via API...')
     
-    // Skip during build time
-    if (process.env.NETLIFY_BUILD === 'true') {
+    // Only skip during actual build phase, not runtime
+    if (typeof window === 'undefined' && process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build') {
       return NextResponse.json({
         success: true,
         message: 'Database test skipped during build',
