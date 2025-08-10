@@ -1,0 +1,6 @@
+# Static files should be served directly
+/*.apk   /:splat  200
+/*.txt   /:splat  200
+
+# All other routes go to Next.js
+/*    /.netlify/functions/nextjs/:splat  200
